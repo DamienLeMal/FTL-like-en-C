@@ -1,0 +1,76 @@
+
+┌───────────────────────────────────────────────────────────────┐
+│  _________                           __      __               │
+│ /   _____/__________    ____  ____  /  \    /  \_____ _______ │
+│ \_____  \\____ \__  \ _/ ___\/ __ \ \   \/\/   /\__  \\_  __ \│
+│ /        \  |_> > __ \\  \__\  ___/  \        /  / __ \|  | \/│
+│/_______  /   __(____  /\___  >___  >  \__/\  /  (____  /__|   │
+│        \/|__|       \/     \/    \/        \/        \/       │
+│                                                               │
+├───────────────────────────────────────────────────────────────┤
+│                                                               │
+│                  Bienvenu(e) dans SPACE WAR !                 │
+│                                                               │
+│ Vous êtes le commandant du *NOM*, un vaisseau dont la         │
+│ mission est de sauver la Vie d'une disparition certaine . . . │
+│                                                               │
+│ En l'an XX456-b, des  astronomes Tumeriens  ont decouvert que │
+│ l'univers  s'apprêtait a commencer un  Big Bang, depuis,  les │
+│ espèces  intelligentes  de  l'univers tout entier se démènent │
+│ afin de prévenir la catastrophe.                              │
+│                                                               │
+│ La Machine  du  défunt  docteur Bagrat  a  prouvé qu'il était │
+│ possible de  voyager entre les  dimensions à l'aide d'un trou │
+│ noir  permettant  ainsi de s'enfuir dans  une dimension où le │
+│ Big Bang n'a jamais eu lieu. . . Cependant, craignant que son │
+│ invention tombe entre de mauvaises mains, le docteur Bagrat a │
+│ dissimulé  les  plans  de  sa  Machine  aux  quatre coins  de │
+│ l'univers . . .                                               │
+│                                                               │
+│ Votre ami,  le petit fils du docteur Bagrat vous a envoyé les │
+│ coordonnées où il suspecte que son aïeul y a caché une partie │
+│ des plans.                                                    │
+│                                                               │
+│ Votre  mission est de retracer les pas du docteur Bagrat afin │
+│ de mettre la main sur ces plans avant qu'il ne soit trop tard │
+│ ou  que  les plans  ne  tombent  entre  les mains  de grandes │
+│ puissances  qui  en  userait  pour  contrôler l'univers . . . │
+│                                                               │
+└───────────────────────────────────────────────────────────────┘
+
+Demo carte du jeu :
+
+┌───────────────────────────────────────────────────────────────┐
+│ ······················ Empire Bolftiak ······················ │
+├───────────────────────────────────────────────────────────────┤
+│   0      1      2      3      4      5      6      7      8   │
+├───────────────────────────────────────────────────────────────┤
+│·······························································│
+│··················· ┌── ■ ──── ■ ──┐·····┌── ■ ─┐··············│
+│······┌── ■ ──── ■ ─┴── ■ ─┐·······├─ ■ ─┴── ■ ─┴── ■ ──┐······│
+│·· ■ ─┴── ■ ──── ■ ──── ■ ─┴── ■ ─┬┘·····┌── ■ ─┐·······├─ ■ ··│
+│··································└── ■ ─┴── ■ ─┴── ■ ──┘······│
+│·······························································│
+└───────────────────────────────────────────────────────────────┘
+
+┌───────────────────────────────────────────────────────────────┐
+│   0      1      2      3      4      5      6      7      8   │
+├───────────────────────────────────────────────────────────────┤
+│                                                               │
+│                    ┌── ■ ──── ■ ──┐     ┌── ■ ─┐              │
+│      ┌── ■ ──── ■ ─┴── ■ ─┐       ├─ ■ ─┴── ■ ─┴── ■ ──┐      │
+│   ■ ─┴── ■ ──── ■ ──── ■ ─┴── ■ ─┬┘     ┌── ■ ─┐       ├─ ■   │
+│                                  └── ■ ─┴── ■ ─┴── ■ ──┘      │
+│                                                               │
+└───────────────────────────────────────────────────────────────┘
+
+┌───────────────────────────────────────────────────────────────┐
+│   0      1      2      ▼      4      5      6      7      8   │
+├───────────────────────────────────────────────────────────────┤
+│                                                               │
+│                    ┌── ■ ──── ■ ──┐     ┌── ■ ─┐              │
+│      ┌── ○ ──── ○ ─┴── ► ─┐       ├─ ■ ─┴── ■ ─┴── ■ ──┐      │
+│   ○ ─┴── ■ ──── ■ ──── ■ ─┴── ■ ─┬┘     ┌── ■ ─┐       ├─ ■   │
+│                                  └── ■ ─┴── ■ ─┴── ■ ──┘      │
+│                                                               │
+└───────────────────────────────────────────────────────────────┘
