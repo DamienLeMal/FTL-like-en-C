@@ -1,3 +1,12 @@
+/*
+
+	main 
+		generate_map
+			niveau
+				navigation
+					printMap
+
+*/
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -36,6 +45,8 @@ typedef struct Weapon Weapon;
 //Donne un point de vue d'ensemble du type de chaque etape pour les dessiner
 struct World{
 	int type[99];
+	int state[99];
+	int nbrEtape;
 };
 typedef struct World World;
 
@@ -44,6 +55,7 @@ struct Etape{
 	int nbr_choix;
 	int milieu;
 	int next[2];
+	int state;
 };
 typedef struct Etape Etape;
 
@@ -100,58 +112,79 @@ void display(int index, int sub)	{
 	}
 }
 
-void printMap(World * w, int nbr){
+void printMap(World * w){
 	char milieuPrint[99][99];
-	for (int i = 0; i < nbr; i++){
+
+	for (int i = 0; i < w->nbrEtape; i++){
 		switch (w->type[i]){
 			case 1:
-				strcpy(milieuPrint[i], "\033[1;33m■\033[0m");
+				switch (w->state[i]) {
+					case 0:
+						strcpy(milieuPrint[i], "\033[0m○\033[0m");
+						break;
+					case 1:
+						strcpy(milieuPrint[i], "\033[1;33m■\033[0m");
+						break;
+					case 2:
+						strcpy(milieuPrint[i], "\033[0m►\033[0m");
+						break;
+				}
 				break;
 			case 2:
-				strcpy(milieuPrint[i], "\033[0;32m■\033[0m");
+				switch (w->state[i]) {
+					case 0:
+						strcpy(milieuPrint[i], "\033[0m○\033[0m");
+						break;
+					case 1:
+						strcpy(milieuPrint[i], "\033[0;32m■\033[0m");
+						break;
+					case 2:
+						strcpy(milieuPrint[i], "\033[0m►\033[0m");
+						break;
+				}
 				break;
 			case 3:
-				strcpy(milieuPrint[i], "\033[1;35m■\033[0m");
+				switch (w->state[i]) {
+					case 0:
+						strcpy(milieuPrint[i], "\033[0m○\033[0m");
+						break;
+					case 1:
+						strcpy(milieuPrint[i], "\033[0;35m■\033[0m");
+						break;
+					case 2:
+						strcpy(milieuPrint[i], "\033[0m►\033[0m");
+						break;
+				}
 				break;
 			case 4:
-				strcpy(milieuPrint[i], "\033[0;34m■\033[0m");
+				switch (w->state[i]) {
+					case 0:
+						strcpy(milieuPrint[i], "\033[0m○\033[0m");
+						break;
+					case 1:
+						strcpy(milieuPrint[i], "\033[0;34m■\033[0m");
+						break;
+					case 2:
+						strcpy(milieuPrint[i], "\033[0m►\033[0m");
+						break;
+				}
 				break;
 		}
 	}
 	printf("├───────────────────────────────────────────────────────────────┤\n"
 		   "│   0      1      2      3      4      5      6      7      8   │\n"
 		   "├───────────────────────────────────────────────────────────────┤\n"
-		   "│                                                               │\n"
-		   "│                    ┌── %s ──── %s ──┐     ┌── %s ─┐              │\n"
-		   "│      ┌── %s ──── %s ─┴── %s ─┐       ├─ %s ─┴── %s ─┴── %s ──┐      │\n"
-		   "│   %s ─┴── %s ──── %s ──── %s ─┴── %s ─┬┘     ┌── %s ─┐       ├─ %s   │\n"
-		   "│                                  └── %s ─┴── %s ─┴── %s ──┘      │\n"
-		   "│                                                               │\n"
+		   "│·······························································│\n"
+		   "│····················┌── %s ──── %s ──┐·····┌── %s ─┐··············│\n"
+		   "│······┌── %s ──── %s ─┴── %s ─┐·······├─ %s ─┴── %s ─┴── %s ──┐······│\n"
+		   "│·· %s ─┴── %s ──── %s ──── %s ─┴── %s ─┬┘·····┌── %s ─┐·······├─ %s ··│\n"
+		   "│··································└── %s ─┴── %s ─┴── %s ──┘······│\n"
+		   "│·······························································│\n"
 		   "└───────────────────────────────────────────────────────────────┘\n",
-		   milieuPrint[0],milieuPrint[1],milieuPrint[2],milieuPrint[3],milieuPrint[4],
-		   milieuPrint[5],milieuPrint[6],milieuPrint[7],milieuPrint[8],milieuPrint[9],
-		   milieuPrint[10],milieuPrint[11],milieuPrint[12],milieuPrint[13],milieuPrint[14],
-		   milieuPrint[15],milieuPrint[16],milieuPrint[17],milieuPrint[18]);
-}
-
-void generate_map(){
-	int r = 0;
-	Route route[99];
-	route[1] = ( struct Route ) {{1,2,3,0,4,0,5,6,7,0,8,0,9,0,9,0,10,0,10,11,12,13,14,15,16,0,16,0,17,0,17,0,18,0,18,0,0,0},38};
-	r = random_nbr(1,1);
-	Etape etape[99];
-	World world;
-	//choose route -> i
-	for (int i = 0; i < route[r].nbr; i++){
-		etape[i/2].next[0] = route[r].road[i-1];
-		etape[i/2].next[1] = route[r].road[i];
-	}
-	for (int i = 0; i < route[r].nbr/2; i++){
-		etape[i].milieu = random_nbr(1,4);
-		world.type[i] = etape[i].milieu;
-	}
-	printMap(&world,19);
-	//Niveau --> Debut d'un cycle
+		   milieuPrint[5],milieuPrint[8],milieuPrint[12],milieuPrint[1],milieuPrint[3],
+		   milieuPrint[6],milieuPrint[10],milieuPrint[13],milieuPrint[16],milieuPrint[0],
+		   milieuPrint[2],milieuPrint[4],milieuPrint[7],milieuPrint[9],milieuPrint[14],
+		   milieuPrint[18],milieuPrint[11],milieuPrint[15],milieuPrint[17]);
 }
 
 //menu vaisseau
@@ -205,21 +238,82 @@ void scenario(int niveau, int milieu, int index){
 	}
 }
 //Menu navigation
-void navigation(int niveau, int etape){
+int navigation(World * w, Etape * e, int current){
+	int choix = 0;
+	int test = 0;
+	int suiv = 0;
+	e->state = 2;
+	w->state[current] = 2;
 	//display carte prégénérée au début du niveau, int etape pour definir le choix possible
-	//choix du milieu (entre 2 et 3 choix possibles) peut être : près d'une etoile, planete, asteroide, vide spacial, chacun de ces millieu ayant ses opportunités et difficultés
-	//pool de scenario possible en fonction de l'avancée et du choix -> scenario(niveau, choix, random);	
+	printMap(w);
+	//choix du milieu (entre 1 et 2 choix possibles) peut être : près d'une etoile, planete, asteroide, vide spacial, chacun de ces millieu ayant ses opportunités et difficultés
+	if (current == w->nbrEtape){
+		test = 1;
+	}
+	while (test == 0){
+		printf("Quelle sera la destination ? \n");
+		scanf("%d",&choix);
+		if (choix == 2){
+			if (e->next[1] == 0){
+				printf("Choix Invalide\n");
+			}else{
+				test = 1;
+			}
+		}else if (choix == 1){
+			test = 1;
+		}else{
+			printf("Choix Invalide\n");
+		}
+	}
+	//pool de scenario possible en fonction de l'avancée et du choix -> scenario(niveau, choix, random);
+	e->state = 0;
+	w->state[current] = 0;
+	suiv = e->next[choix - 1];
+	printf("%d\n",suiv );
+	return (suiv);
 }
-void niveau(){
-	//for 8 etapes
+
+
+void niveau(Route * route){
+	int currentEtape = 0;
+
+	//attribution des valeurs générées dans Etape
+	Etape etape[99];
+	World world;
+	for (int i = 0; i < route->nbr; i++){
+		etape[i/2].next[0] = route->road[i-1];
+		etape[i/2].next[1] = route->road[i];
+		printf("%d : %d %d\n",i/2, etape[i/2].next[0],etape[i/2].next[1]);
+	}
+	for (int i = 0; i < route->nbr/2; i++){
+		etape[i].milieu = random_nbr(1,4);
+		world.type[i] = etape[i].milieu;
+		etape[i].state = 1;
+		world.state[i] = etape[i].state;
+	}
+	world.nbrEtape = route->nbr;
+	for (int i = 0; i < 8; i++){
+		currentEtape = navigation(&world,&etape[currentEtape],currentEtape);
 		//navigation
 		//check end
+	}
 }
+
+
+void generateMap(){
+	int r = 0;
+	Route route[99];
+	route[1] = ( struct Route ) {{1,2,3,0,4,0,5,6,7,0,8,0,9,0,9,0,10,0,10,11,12,13,14,15,16,0,16,0,17,0,17,0,18,0,18,0,0,0},38};
+	r = random_nbr(1,1);
+	niveau(&route[1]);
+	//Niveau --> Debut d'un cycle
+}
+
 
 int main(){
 	srand(time(NULL));
 	int end = 0;
-	generate_map();
+	generateMap();
 	//cycle
 	while (end == 0){
 		//generate map
