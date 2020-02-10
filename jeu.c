@@ -47,6 +47,7 @@ struct World{
 	int type[99];
 	int state[99];
 	int nbrEtape;
+	int route;
 };
 typedef struct World World;
 
@@ -61,6 +62,7 @@ typedef struct Etape Etape;
 
 //Definit l'agencement des etapes selon un pattern prédéterminé
 struct Route{
+	int id;
 	int road[99];
 	int nbr;
 };
@@ -73,18 +75,19 @@ int random_nbr (int min, int max){
 };
 
 void temp_test_color(){
-	printf("\033[0;31m■■■");
-    printf("\033[1;31m■■■");
-    printf("\033[0;32m■■■");
-    printf("\033[1;32m■■■");
-    printf("\033[0;33m■■■");
-    printf("\033[1;33m■■■");
-    printf("\033[0;34m■■■");
-    printf("\033[1;34m■■■");
-    printf("\033[0;35m■■■");
-    printf("\033[1;35m■■■");
-    printf("\033[0;33m■■■");
-    printf("\033[1;36m■■■");
+	printf("\033[0;31m■■■");//rouge
+    printf("\033[1;31m■■■");//rouge pâle
+    printf("\033[0;32m■■■");//vert
+    printf("\033[1;32m■■■");//vert pâle
+    printf("\033[0;33m■■■");//jaune foncé
+    printf("\033[1;33m■■■");//jaune clair
+    printf("\033[0;34m■■■");//Bleu
+    printf("\033[1;34m■■■");//Bleu clair
+    printf("\033[0;35m■■■");//Violet
+    printf("\033[1;35m■■■");//Violet pâle
+    printf("\033[0;33m■■■");//Ocre
+    printf("\033[0;36m■■■");//Cyan
+    printf("\033[1;36m■■■");//Cyan fluo
 }
 
 
@@ -93,13 +96,45 @@ void display(int index, int sub)	{
 	switch(index) {
 		case 1 :
 			//Titre
-			printf("  _________                            __      __               \t"
-				   " /   _____/__________    ____  ____   /  \\    /  \\_____ _______ \t"
-				   " \\_____  \\\\____ \\__  \\ _/ ___\\/ __ \\  \\   \\/\\/   /\\__  \\\\_  __ \\\t"
-				   " /        \\  |_> > __ \\\\  \\__\\  ___/   \\        /  / __ \\|  | \\/\t"
-				   "/_______  /   __(____  /\\___  >___  >   \\__/\\  /  (____  /__|   \t"
-				   "        \\/|__|       \\/     \\/    \\/         \\/        \\/       ");
-
+			printf("┌───────────────────────────────────────────────────────────────┐\n"
+				   "│\033[1;33m  _________                           __      __               \033[0m│\n"
+				   "│\033[1;33m /   _____/__________    ____  ____  /  \\    /  \\_____ _______ \033[0m│\n"
+				   "│\033[1;33m \\_____  \\\\____ \\__  \\ _/ ___\\/ __ \\ \\   \\/\\/   /\\__  \\\\_  __ \\\033[0m│\n"
+				   "│\033[1;33m /        \\  |_> > __ \\\\  \\__\\  ___/  \\        /  / __ \\|  | \\/\033[0m│\n"
+				   "│\033[1;33m/_______  /   __(____  /\\___  >___  >  \\__/\\  /  (____  /__|   \033[0m│\n"
+				   "│\033[1;33m        \\/|__|       \\/     \\/    \\/        \\/        \\/       \033[0m│\n"
+				   "│                                                               │\n"
+				   "├───────────────────────────────────────────────────────────────┤\n"
+				   "│                                                               │\n"
+				   "│                  Bienvenu(e) dans \033[0;33mSPACE WAR\033[0m !                 │\n"
+				   "│                                                               │\n"
+				   "│ Vous êtes le commandant  du  \033[0;36mSS Atlanta\033[0m, un vaisseau  dont la │\n"
+				   "│ mission est de sauver la Vie d'une disparition certaine . . . │\n"
+				   "│                                                               │\n"
+				   "│ En l'an XX456-b, des  astronomes Tumeriens  ont decouvert que │\n"
+				   "│ l'univers  s'apprêtait a commencer un  \033[0;31mBig Bang\033[0m, depuis,  les │\n"
+				   "│ espèces  intelligentes  de  l'univers tout entier se démènent │\n"
+				   "│ afin de prévenir la catastrophe.                              │\n"
+				   "│                                                               │\n"
+				   "│ La \033[1;33mMachine\033[0m  du  défunt  \033[1;35mdocteur Bagrat\033[0m  a  prouvé qu'il était │\n"
+				   "│ possible de  \033[1;36mvoyager entre les dimensions\033[0m  à l'aide d'un trou │\n"
+				   "│ noir  permettant  ainsi de s'enfuir dans  une dimension où le │\n"
+				   "│ \033[0;31mBig Bang\033[0m n'a jamais eu lieu. . . Cependant, craignant que son │\n"
+				   "│ invention tombe entre de mauvaises mains, le \033[1;35mdocteur Bagrat\033[0m a │\n"
+				   "│ dissimulé  les  \033[1;32mplans\033[0m  de  sa  \033[1;33mMachine\033[0m  aux  quatre coins  de │\n"
+				   "│ l'univers . . .                                               │\n"
+				   "│                                                               │\n"
+				   "│ Votre ami,  le petit fils du \033[1;35mdocteur Bagrat\033[0m vous a envoyé les │\n"
+				   "│ coordonnées où il suspecte que son aïeul y a caché une partie │\n"
+				   "│ des \033[1;32mplans\033[0m.                                                    │\n"
+				   "│                                                               │\n"
+				   "│ Votre  mission est de retracer les pas du \033[1;35mdocteur Bagrat\033[0m afin │\n"
+				   "│ de mettre la main sur ces \033[1;32mplans\033[0m avant qu'il ne soit trop tard │\n"
+				   "│ ou  que  les \033[1;32mplans\033[0m  ne  tombent  entre  les mains  de grandes │\n"
+				   "│ puissances  qui  en  userait  pour  contrôler l'univers . . . │\n"
+				   "│                                                               │\n"
+				   "└───────────────────────────────────────────────────────────────┘\n");
+			break;
 		//scenario
 		case 2 :
 			switch (sub) {
@@ -171,20 +206,41 @@ void printMap(World * w){
 				break;
 		}
 	}
-	printf("├───────────────────────────────────────────────────────────────┤\n"
-		   "│   0      1      2      3      4      5      6      7      8   │\n"
-		   "├───────────────────────────────────────────────────────────────┤\n"
-		   "│·······························································│\n"
-		   "│····················┌── %s ──── %s ──┐·····┌── %s ─┐··············│\n"
-		   "│······┌── %s ──── %s ─┴── %s ─┐·······├─ %s ─┴── %s ─┴── %s ──┐······│\n"
-		   "│·· %s ─┴── %s ──── %s ──── %s ─┴── %s ─┬┘·····┌── %s ─┐·······├─ %s ··│\n"
-		   "│··································└── %s ─┴── %s ─┴── %s ──┘······│\n"
-		   "│·······························································│\n"
-		   "└───────────────────────────────────────────────────────────────┘\n",
-		   milieuPrint[5],milieuPrint[8],milieuPrint[12],milieuPrint[1],milieuPrint[3],
-		   milieuPrint[6],milieuPrint[10],milieuPrint[13],milieuPrint[16],milieuPrint[0],
-		   milieuPrint[2],milieuPrint[4],milieuPrint[7],milieuPrint[9],milieuPrint[14],
-		   milieuPrint[18],milieuPrint[11],milieuPrint[15],milieuPrint[17]);
+	switch (w->route){
+		case 1:	
+			printf("├───────────────────────────────────────────────────────────────┤\n"
+		   		   "│   0      1      2      3      4      5      6      7      8   │\n"
+		   		   "├───────────────────────────────────────────────────────────────┤\n"
+		   		   "│·······························································│\n"
+		   		   "│····················┌── %s ──── %s ──┐·····┌── %s ─┐··············│\n"
+		   		   "│······┌── %s ──── %s ─┴── %s ─┐·······├─ %s ─┴── %s ─┴── %s ──┐······│\n"
+		   		   "│·· %s ─┴── %s ──── %s ──── %s ─┴── %s ─┬┘·····┌── %s ─┐·······├─ %s ··│\n"
+		   		   "│··································└── %s ─┴── %s ─┴── %s ──┘······│\n"
+		   		   "│·······························································│\n"
+		   		   "└───────────────────────────────────────────────────────────────┘\n",
+		   			milieuPrint[5],milieuPrint[8],milieuPrint[12],milieuPrint[1],milieuPrint[3],
+		   			milieuPrint[6],milieuPrint[10],milieuPrint[13],milieuPrint[16],milieuPrint[0],
+		   			milieuPrint[2],milieuPrint[4],milieuPrint[7],milieuPrint[9],milieuPrint[14],
+		   			milieuPrint[18],milieuPrint[11],milieuPrint[15],milieuPrint[17]);
+			break;
+		case 2:
+			printf("├───────────────────────────────────────────────────────────────┤\n"
+		   		   "│   0      1      2      3      4      5      6      7      8   │\n"
+		   		   "├───────────────────────────────────────────────────────────────┤\n"
+		   		   "│·······························································│\n"
+		   		   "│····················┌── %s ─┬── %s ──┬─ %s ──── %s ─┬── %s ──┐······│\n"
+		   		   "│······┌── %s ──── %s ─┴┐·····└── %s ─┬┘·····┌── %s ─┴── %s ──┼─ %s ··│\n"
+		   		   "│·· %s ─┴── %s ─┬── %s ──┴─ %s ──┐·····└── %s ─┴┬─ %s ──── %s ──┘······│\n"
+		   		   "│·············└── %s ─┬── %s ──┴─ %s ──┬─ %s ──┘····················│\n"
+		   		   "│····················└── %s ──── %s ──┘···························│\n"
+		   		   "└───────────────────────────────────────────────────────────────┘\n",
+		   		   milieuPrint[6],milieuPrint[10],milieuPrint[14],milieuPrint[17],milieuPrint[20],
+		   		   milieuPrint[1],milieuPrint[3],milieuPrint[11],milieuPrint[18],milieuPrint[21],
+		   		   milieuPrint[23],milieuPrint[0],milieuPrint[2],milieuPrint[4],milieuPrint[7],
+		   		   milieuPrint[15],milieuPrint[19],milieuPrint[22],milieuPrint[5],milieuPrint[8],
+		   		   milieuPrint[12],milieuPrint[16],milieuPrint[9],milieuPrint[13]);
+			break;
+	}
 }
 
 //menu vaisseau
@@ -280,10 +336,11 @@ void niveau(Route * route){
 	//attribution des valeurs générées dans Etape
 	Etape etape[99];
 	World world;
+
+	world.route = route->id;
 	for (int i = 0; i < route->nbr; i++){
 		etape[i/2].next[0] = route->road[i-1];
 		etape[i/2].next[1] = route->road[i];
-		printf("%d : %d %d\n",i/2, etape[i/2].next[0],etape[i/2].next[1]);
 	}
 	for (int i = 0; i < route->nbr/2; i++){
 		etape[i].milieu = random_nbr(1,4);
@@ -303,9 +360,10 @@ void niveau(Route * route){
 void generateMap(){
 	int r = 0;
 	Route route[99];
-	route[1] = ( struct Route ) {{1,2,3,0,4,0,5,6,7,0,8,0,9,0,9,0,10,0,10,11,12,13,14,15,16,0,16,0,17,0,17,0,18,0,18,0,0,0},38};
-	r = random_nbr(1,1);
-	niveau(&route[1]);
+	route[1] = ( struct Route ) {1,{1,2,3,0,4,0,5,6,7,0,8,0,9,0,9,0,10,0,10,11,12,13,14,15,16,0,16,0,17,0,17,0,18,0,18,0,0,0},38};
+	route[2] = ( struct Route ) {2,{1,2,3,0,4,5,6,7,7,0,8,9,10,11,12,0,12,0,13,0,14,0,14,15,16,0,16,0,17,0,18,19,19,0,20,21,20,21,22,0,23,0,23,0,23,0,0,0},48};
+	r = random_nbr(1,2);
+	niveau(&route[r]);
 	//Niveau --> Debut d'un cycle
 }
 
@@ -313,6 +371,10 @@ void generateMap(){
 int main(){
 	srand(time(NULL));
 	int end = 0;
+	display(1,1);
+
+
+
 	generateMap();
 	//cycle
 	while (end == 0){
