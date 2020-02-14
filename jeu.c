@@ -67,6 +67,12 @@ struct Route{
 	int nbr;
 };
 typedef struct Route Route;
+
+Vaisseau atlanta = {1,"SS Atlanta", 1, 0, 0 , 60, 20, 10, 0};
+
+Vaisseau ennemis[99];
+
+Weapon cannonIon = {1, "Cannon à Ions", 20, 2, 80};
 //random
 int random_nbr (int min, int max){
 	int nbr = 0;
@@ -90,7 +96,9 @@ void temp_test_color(){
     printf("\033[1;36m■■■");//Cyan fluo
 }
 
-
+void printCustomChar(char array[]){
+	printf("%s\n",&array[0]);//fonctionne !!
+}
 //display en couleurs s'il vous plait
 void display(int index, int sub)	{
 	switch(index) {
@@ -144,10 +152,49 @@ void display(int index, int sub)	{
 					break;
 			}
 			break;
+		//Menu Vaisseau
+		case 3:
+			switch (sub) {
+				case 1:
+					printf("┌──────────────────────────────────────────────────────────────┐\n"
+						   "│                       SS Atlanta                             │\n"
+						   "├────────────────────────────┬─────────────────────────────────┤\n"
+						   "│                            │                                 │\n"
+						   "│ [1] Armes                  │ [2] Systèmes                    │\n"
+						   "│                            │                                 │\n"
+						   "├────────────────────────────┼─────────────────────────────────┤\n"
+						   "│                            │                                 │\n"
+						   "│ [3] Equipage               │ [4] Navigation                  │\n"
+						   "│                            │                                 │\n"
+						   "├────────────────────────────┼─────────────────────────────────┤\n");
+					if (atlanta.fuel < 10) {
+						printf("│ Fuel ------------------- %d ",atlanta.fuel);
+					}else if (atlanta.fuel < 100) {
+						printf("│ Fuel ------------------ %d ",atlanta.fuel);
+					}else if (atlanta.fuel < 1000) {
+						printf("│ Fuel ----------------- %d ",atlanta.fuel);
+					}
+					if (atlanta.flouze < 10) {
+						printf("│ Crédits ------------------- %d § │\n",atlanta.flouze);
+					}else if (atlanta.flouze < 100) {
+						printf("│ Crédits ------------------ %d § │\n",atlanta.flouze);
+					}else if (atlanta.flouze < 1000) {
+						printf("│ Crédits ----------------- %d § │\n",atlanta.flouze);
+					}
+					printf("└────────────────────────────┴─────────────────────────────────┘\n");
+					break;
+				case 2:
+					printf("┌──────────────────────────────────────────────────────────────┐"
+						   "│                          Armes                               │"
+						   "├─────────────────────┬────────────────────────────────────────┤"
+						   "│ [1] Item Name       │ Description in italic, describe use    │"
+						   "└─────────────────────┴────────────────────────────────────────┘");
+					printCustomChar("Bonjour Monde");
+					break;
+			}
 	}
 }
-
-void printMap(World * w){
+void printMap(World * w, int monde){
 	char milieuPrint[99][99];
 
 	for (int i = 0; i < w->nbrEtape; i++){
@@ -207,10 +254,10 @@ void printMap(World * w){
 		}
 	}
 	printf("┌───────────────────────────────────────────────────────────────┐\n"
-		   "│                 ---─── Empire Bolftiak ───---                 │\n");
-	printf("├───────────────────────────────────────────────────────────────┤\n"
+		   "│                      ---─── Monde %d ───---                    │\n"
+		   "├───────────────────────────────────────────────────────────────┤\n"
 		   "│   0      1      2      3      4      5      6      7      8   │\n"
-		   "├───────────────────────────────────────────────────────────────┤\n");
+		   "├───────────────────────────────────────────────────────────────┤\n",monde);
 	switch (w->route){
 		case 1:	
 			printf("│·······························································│\n"
@@ -259,7 +306,7 @@ void printMap(World * w){
 				   "│·······························································│\n",
 				   milieuPrint[7],milieuPrint[10],milieuPrint[2],milieuPrint[4],milieuPrint[8],
 		   		   milieuPrint[11],milieuPrint[12],milieuPrint[13],milieuPrint[15],milieuPrint[0],
-		   		   milieuPrint[1],milieuPrint[3],milieuPrint[5],milieuPrint[9],milieuPrint[6]);
+		   		   milieuPrint[1],milieuPrint[3],milieuPrint[5],milieuPrint[9],milieuPrint[14],milieuPrint[6]);
 			break;
 		/*case 5:
 			printf("\n"
@@ -281,14 +328,27 @@ void printMap(World * w){
 	printf("└───────────────────────────────────────────────────────────────┘\n");
 }
 
-//menu vaisseau
-	//voir ressources
-	//voir équipage et compétences
-	//voir niveau des systèmes
-	//voir armes équipées et leurs caractéristiques
-
-//equiper armes lorsqu'il y en a une nouvelle
-
+void menu_vaisseau() {
+	int test = 0;
+	int choix = 0;
+	while (test == 0){
+		system("clear");
+		display(3,1);
+		scanf("%d",&choix);
+		switch (choix) {
+			case 1://Armes
+				display(3,2);
+				scanf("%d",&choix);
+				break;
+			case 2:
+				break;
+			case 3:
+				break;
+			case 4:
+				break;
+		}
+	}
+}
 //menu display combat
 	//voir Etat Coque + Bouclier
 		/*
@@ -324,6 +384,7 @@ void scenario(int niveau, int milieu, int index){
 							//print
 							//choix ou arboressence de choix
 								//output -> combat, shop, récolte ou perte
+							//menu vaisseau
 							break;
 					}
 					break;
@@ -332,14 +393,14 @@ void scenario(int niveau, int milieu, int index){
 	}
 }
 //Menu navigation
-int navigation(World * w, Etape * e, int current){
+int navigation(World * w, Etape * e, int current, int monde){
 	int choix = 0;
 	int test = 0;
 	int suiv = 0;
 	e->state = 2;
 	w->state[current] = 2;
 	//display carte prégénérée au début du niveau, int etape pour definir le choix possible
-	printMap(w);
+	printMap(w, monde);
 	//choix du milieu (entre 1 et 2 choix possibles) peut être : près d'une etoile, planete, asteroide, vide spacial, chacun de ces millieu ayant ses opportunités et difficultés
 	if (current == w->nbrEtape){
 		test = 1;
@@ -359,7 +420,6 @@ int navigation(World * w, Etape * e, int current){
 			printf("Choix Invalide\n");
 		}
 	}
-	//pool de scenario possible en fonction de l'avancée et du choix -> scenario(niveau, choix, random);
 	e->state = 0;
 	w->state[current] = 0;
 	suiv = e->next[choix - 1];
@@ -387,9 +447,12 @@ void niveau(Route * route){
 		world.state[i] = etape[i].state;
 	}
 	world.nbrEtape = route->nbr;
-	for (int i = 0; i < 8; i++){
-		currentEtape = navigation(&world,&etape[currentEtape],currentEtape);
+	for (int i = 1; i < 9; i++){
+		currentEtape = navigation(&world,&etape[currentEtape],currentEtape,i);
 		//navigation
+		int alea = random_nbr(1,10);
+		
+		scenario(i,currentEtape,alea);
 		//check end
 	}
 }
@@ -400,7 +463,7 @@ void generateMap(){
 	Route route[99];
 	route[1] = ( struct Route ) {1,{1,2,3,0,4,0,5,6,7,0,8,0,9,0,9,0,10,0,10,11,12,13,14,15,16,0,16,0,17,0,17,0,18,0,18,0,0,0},38};
 	route[2] = ( struct Route ) {2,{1,2,3,0,4,5,6,7,7,0,8,9,10,11,12,0,12,0,13,0,14,0,14,15,16,0,16,0,17,0,18,19,19,0,20,21,20,21,22,0,23,0,23,0,23,0,0,0},48};
-	route[3] = (struct Route ) {3,{1,2,3,4,4,5,6,0,6,7,8,9,10,11,12,0,13,0,13,0,14,15,15,0,16,17,16,17,18,0,19,0,19,0,20,0,21,0,22,23,23,0,24,0,24,0,24,0,0,0},50}
+	route[3] = (struct Route ) {3,{1,2,3,4,4,5,6,0,6,7,8,9,10,11,12,0,13,0,13,0,14,15,15,0,16,17,16,17,18,0,19,0,19,0,20,0,21,0,22,23,23,0,24,0,24,0,24,0,0,0},50};
 	route[4] = (struct Route ) {4,{1,0,2,3,4,0,5,6,7,8,9,0,9,0,10,0,11,0,11,0,12,0,12,0,13,14,15,0,15,0,0,0},32};
 	r = random_nbr(1,4);
 	niveau(&route[r]);
@@ -411,11 +474,11 @@ void generateMap(){
 int main(){
 	srand(time(NULL));
 	int end = 0;
-	display(1,1);
+	//display(1,1);
+	menu_vaisseau();
 
 
-
-	generateMap();
+	//generateMap();
 	//cycle
 	while (end == 0){
 		//generate map
