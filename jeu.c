@@ -47,7 +47,6 @@
 		int energy;
 		int maxEnergy;
 		int energyGain;
-		int speed;
 		//pour les ennemis, correspondra à la valeur du loot
 		int fuel;
 		int flouze;
@@ -85,17 +84,28 @@
 		int nbr;
 	};
 	typedef struct Route Route;
-					//id ;nom ;wp1;wp2;wp3;hull;mxHull;shield;mxShield;nrj;mxNrj;sp ; F ; § ; sys ; clr
-	Vaisseau atlanta = {1,"SS Atlanta", 1, 0, 0, 50, 50, 20, 20, 0, 10, 20, 0, 10, 12, 600, {1,1,1,0,0}, "0;44"};
+					//id ;nom ;wp1;wp2;wp3;hull;mxHull;shield;mxShield;shieldGain;nrj;mxNrj;nrjGain;sp ; F ; § ; sys ; clr
+	Vaisseau atlanta = {1,"SS Atlanta", 1, 0, 0, 50, 50, 20, 20, 0, 10, 20, 0, 12, 600, {1,1,1,0,0}, "0;44"};
 
-	Vaisseau ennemis[99] = {{0,"│ Eclaireur Pyrien │", 1, 0, 0, 40, 40, 10, 10, 5, 10, 10, 5, 10, 2, 12, {0}, "0;101"},{1,"│ Explorer IV │", 1, 0, 0, 80, 80, 10, 10, 2, 10, 20, 10, 12, 14, 22, {0}, "0;101"}};
+	Vaisseau ennemis[99] = {{0,"│ Eclaireur Pyrien │", 1, 0, 0, 40, 40, 10, 10, 5, 10, 10, 5, 4, 11, {0}, "0;101"},
+							{1,"│ Satellite │", 1, 0, 0, 40, 40, 20, 20, 5, 10, 10, 5, 2, 12, {0}, "43"},
+							{2,"│ Eclaireur Pyrien │", 2, 0, 0, 40, 40, 10, 10, 5, 10, 10, 5, 1, 15, {0}, "0;101"},
+							{3,"│ Vagabond │", 2, 0, 0, 20, 20, 40, 40, 5, 10, 10, 5, 2, 13, {0}, "0;101"},
+							{4,"│ Drone de Recherches │", 3, 0, 0, 40, 40, 10, 10, 5, 10, 10, 5, 1, 11, {0}, "0;101"},
+							{5,"│ Eclaireur Pyrien │", 3, 0, 0, 40, 40, 10, 10, 5, 10, 10, 5, 3, 14, {0}, "0;101"},
+							{6,"│ Tellordiens │", 4, 0, 0, 15, 15, 30, 30, 10, 10, 10, 5, 2, 12, {0}, "0;101"},
+							{7,"│ Eclaireur Pyrien │", 4, 0, 0, 40, 40, 10, 10, 5, 10, 10, 5, 4, 5, {0}, "0;101"}
+						};
 
 	Crew james = {0, 1, 5};
 	Crew peter = {0, 1, 5};
 	Crew victor = {0, 1, 5};
 	Crew qtal = {0, 1, 5};
 
-	Weapon armes[99] = {{0, "", 0, 0, 0, 0, "", -1, 0},{1, "Cannon à Ions ", 10 /*2 digits*/, 2, 80, 150, "150", 0, 3},{2, "Vieux Cannon", 20 , 1, 60, 100, "100", 0, 3},{3, "Gatling", 10 , 5, 40, 160, "160", 0, 3},{4, "Vieux Missile", 15 , 1, 100, 150, "150", 0, 3}};
+	Weapon armes[99] = {{0, "", 0, 0, 0, 0, "", -1, 0},{1, "Cannon à Ions  ", 10 /*2 digits*/, 2, 80, 150, "150", 0, 3},{2, "Vieux Cannon", 20 , 1, 60, 100, "100", 0, 3},{3, "Gatling", 10 , 5, 40, 160, "160", 0, 3},{4, "Vieux Missile", 15 , 1, 100, 150, "150", 0, 3},//tier D
+													   {5, "Cannon à Pulsion", 20, 3, 50, 200, "220", 0, 4},{6, "Gatling à Proton", 20, 5, 40, 200, "200", 0, 4},{7, "Laser ", 40, 1, 60, 200, "200", 0, 4},{8, "Cannon XM1", 15, 2, 80, 190, "190", 0, 4},//tier C
+													   //{5, "Cannon à impulsion", 20, 3, 50, 200, "220", 0, 4},{6, "Gatling à Proton", 20, 5, 40, 200, "200", 0, 4},{7, "Laser ", 40, 1, 60, 200, "200", 0, 4},{8, "Cannon XM1", 15, 2, 80, 190, "190", 0, 4},
+													};
 
 	char clr[] = "1;91";
 
@@ -154,6 +164,22 @@
 				printf("│ [%s] \e[1;92mVieux Missile\e[0m    │ \e[3mCe lance missile ne fait que peu de    \e[0m│\n"
 					   "│  Coût Energie : 3    │ \e[3mdégats mais il ne rate jamais sa cible \e[0m│\n", &nbr[0]);
 				break;
+			case 5:
+				printf("│ [%s] \e[0;32mCannon à Pulsion\e[0m │ \e[3mCe cannon fonctionne par pulsions      \e[0m│\n"
+					   "│  Coût Energie : 4    │ \e[3mélectro-magnétiques                    \e[0m│\n", &nbr[0]);
+				break;
+			case 6:
+				printf("│ [%s] \e[0;32mGatling à Photon\e[0m │ \e[3mCette gatling fonctionne grâce à la    \e[0m│\n"
+					   "│  Coût Energie : 4    │ \e[3mlumière émise par ses propres tirs !   \e[0m│\n", &nbr[0]);
+				break;
+			case 7:
+				printf("│ [%s] \e[0;32mLase\e[0m             │ \e[3mCette arme produit un rayon laser      \e[0m│\n"
+					   "│  Coût Energie : 4    │ \e[3mtrès puissant mais difficile à orienter\e[0m│\n", &nbr[0]);
+				break;
+			case 8:
+				printf("│ [%s] \e[0;32mCannon XM1      \e[0m │ \e[3mPremier cannon de la gamme XM,         \e[0m│\n"
+					   "│  Coût Energie : 4    │ \e[3mabordable et équilibré                \e[0m│\n", &nbr[0]);
+				break;
 			//id systems + 30
 			case 31:
 				printf("│%s\e[40mGénérateur:\e[0m \e[3mPermet de récupérer ponctuellement de l'énergie\e[0m │\n",&nbr[0]);
@@ -171,80 +197,156 @@
 				printf("│%s\e[40mExtension d'arme 3:\e[0m \e[3mRajoute un emlacement pour une arme\e[0m     │\n",&nbr[0]);
 				break;
 			case 101 :
-			printf("┌───────────────────┐\n"
-				   "│   \e[1;92mCannon à Ions\e[0m   │\n"
-				   "├───────────────────┤\n"
-				   "│      Attaque      │\n" 
-				   "├───────────────────┤\n"
-				   "│   ♦  ○  ○  ○  ○   │\n"
-				   "├───────────────────┤\n"
-				   "│     Precision     │\n"
-				   "├───────────────────┤\n"
-				   "│   ♦  ♦  ♦  ♦  ○   │\n"
-				   "├───────────────────┤\n"
-				   "│   Nombre de Tirs  │\n"
-				   "├───────────────────┤\n"
-				   "│   ♦  ♦  ○  ○  ○   │\n"
-				   "├───────────────────┤\n"
-				   "│ [0] Retour        │\n"
-				   "└───────────────────┘\n");
+				printf("┌───────────────────┐\n"
+					   "│   \e[1;92mCannon à Ions\e[0m   │\n"
+					   "├───────────────────┤\n"
+					   "│      Attaque      │\n" 
+					   "├───────────────────┤\n"
+					   "│   ♦  ○  ○  ○  ○   │\n"
+					   "├───────────────────┤\n"
+					   "│     Precision     │\n"
+					   "├───────────────────┤\n"
+					   "│   ♦  ♦  ♦  ♦  ○   │\n"
+					   "├───────────────────┤\n"
+					   "│   Nombre de Tirs  │\n"
+					   "├───────────────────┤\n"
+					   "│   ♦  ♦  ○  ○  ○   │\n"
+					   "├───────────────────┤\n"
+					   "│ [0] Retour        │\n"
+					   "└───────────────────┘\n");
 				break;
 			case 102 :
-			printf("┌───────────────────┐\n"
-				   "│    \e[1;92mVieux Cannon\e[0m   │\n"
-				   "├───────────────────┤\n"
-				   "│      Attaque      │\n" 
-				   "├───────────────────┤\n"
-				   "│   ♦  ○  ○  ○  ○   │\n"
-				   "├───────────────────┤\n"
-				   "│     Precision     │\n"
-				   "├───────────────────┤\n"
-				   "│   ♦  ♦  ♦  ○  ○   │\n"
-				   "├───────────────────┤\n"
-				   "│   Nombre de Tirs  │\n"
-				   "├───────────────────┤\n"
-				   "│   ♦  ○  ○  ○  ○   │\n"
-				   "├───────────────────┤\n"
-				   "│ [0] Retour        │\n"
-				   "└───────────────────┘\n");
+				printf("┌───────────────────┐\n"
+					   "│    \e[1;92mVieux Cannon\e[0m   │\n"
+					   "├───────────────────┤\n"
+					   "│      Attaque      │\n" 
+					   "├───────────────────┤\n"
+					   "│   ♦  ○  ○  ○  ○   │\n"
+					   "├───────────────────┤\n"
+					   "│     Precision     │\n"
+					   "├───────────────────┤\n"
+					   "│   ♦  ♦  ♦  ○  ○   │\n"
+					   "├───────────────────┤\n"
+					   "│   Nombre de Tirs  │\n"
+					   "├───────────────────┤\n"
+					   "│   ♦  ○  ○  ○  ○   │\n"
+					   "├───────────────────┤\n"
+					   "│ [0] Retour        │\n"
+					   "└───────────────────┘\n");
 				break;
 			case 103 :
-			printf("┌───────────────────┐\n"
-				   "│      \e[1;92mGatling\e[0m      │\n"
-				   "├───────────────────┤\n"
-				   "│      Attaque      │\n" 
-				   "├───────────────────┤\n"
-				   "│   ♦  ○  ○  ○  ○   │\n"
-				   "├───────────────────┤\n"
-				   "│     Precision     │\n"
-				   "├───────────────────┤\n"
-				   "│   ♦  ♦  ♦  ○  ○   │\n"
-				   "├───────────────────┤\n"
-				   "│   Nombre de Tirs  │\n"
-				   "├───────────────────┤\n"
-				   "│   ♦  ♦  ♦  ♦  ♦   │\n"
-				   "├───────────────────┤\n"
-				   "│ [0] Retour        │\n"
-				   "└───────────────────┘\n");
+				printf("┌───────────────────┐\n"
+					   "│      \e[1;92mGatling\e[0m      │\n"
+					   "├───────────────────┤\n"
+					   "│      Attaque      │\n" 
+					   "├───────────────────┤\n"
+					   "│   ♦  ○  ○  ○  ○   │\n"
+					   "├───────────────────┤\n"
+					   "│     Precision     │\n"
+					   "├───────────────────┤\n"
+					   "│   ♦  ♦  ♦  ○  ○   │\n"
+					   "├───────────────────┤\n"
+					   "│   Nombre de Tirs  │\n"
+					   "├───────────────────┤\n"
+					   "│   ♦  ♦  ♦  ♦  ♦   │\n"
+					   "├───────────────────┤\n"
+					   "│ [0] Retour        │\n"
+					   "└───────────────────┘\n");
 				break;
 			case 104 :
-			printf("┌───────────────────┐\n"
-				   "│   \e[1;92mVieux Missile\e[0m   │\n"
-				   "├───────────────────┤\n"
-				   "│      Attaque      │\n" 
-				   "├───────────────────┤\n"
-				   "│   ♦  ○  ○  ○  ○   │\n"
-				   "├───────────────────┤\n"
-				   "│     Precision     │\n"
-				   "├───────────────────┤\n"
-				   "│   ♦  ♦  ♦  ♦  ♦   │\n"
-				   "├───────────────────┤\n"
-				   "│   Nombre de Tirs  │\n"
-				   "├───────────────────┤\n"
-				   "│   ♦  ○  ○  ○  ○   │\n"
-				   "├───────────────────┤\n"
-				   "│ [0] Retour        │\n"
-				   "└───────────────────┘\n");
+				printf("┌───────────────────┐\n"
+					   "│   \e[1;92mVieux Missile\e[0m   │\n"
+					   "├───────────────────┤\n"
+					   "│      Attaque      │\n" 
+					   "├───────────────────┤\n"
+					   "│   ♦  ○  ○  ○  ○   │\n"
+					   "├───────────────────┤\n"
+					   "│     Precision     │\n"
+					   "├───────────────────┤\n"
+					   "│   ♦  ♦  ♦  ♦  ♦   │\n"
+					   "├───────────────────┤\n"
+					   "│   Nombre de Tirs  │\n"
+					   "├───────────────────┤\n"
+					   "│   ♦  ○  ○  ○  ○   │\n"
+					   "├───────────────────┤\n"
+					   "│ [0] Retour        │\n"
+					   "└───────────────────┘\n");
+				break;
+			case 105 :
+				printf("┌───────────────────┐\n"
+					   "│ \e[0;32mCannon à Pulsion\e[0m│\n"
+					   "├───────────────────┤\n"
+					   "│      Attaque      │\n" 
+					   "├───────────────────┤\n"
+					   "│   ♦  ○  ○  ○  ○   │\n"
+					   "├───────────────────┤\n"
+					   "│     Precision     │\n"
+					   "├───────────────────┤\n"
+					   "│   ♦  ♦  ○  ○  ○   │\n"
+					   "├───────────────────┤\n"
+					   "│   Nombre de Tirs  │\n"
+					   "├───────────────────┤\n"
+					   "│   ♦  ♦  ♦  ○  ○   │\n"
+					   "├───────────────────┤\n"
+					   "│ [0] Retour        │\n"
+					   "└───────────────────┘\n");
+				break;
+			case 106 :
+				printf("┌───────────────────┐\n"
+					   "│  \e[0;32mGatling à Proton\e[0m │\n"
+					   "├───────────────────┤\n"
+					   "│      Attaque      │\n" 
+					   "├───────────────────┤\n"
+					   "│   ♦  ♦  ♦  ○  ○   │\n"
+					   "├───────────────────┤\n"
+					   "│     Precision     │\n"
+					   "├───────────────────┤\n"
+					   "│   ♦  ○  ○  ○  ○   │\n"
+					   "├───────────────────┤\n"
+					   "│   Nombre de Tirs  │\n"
+					   "├───────────────────┤\n"
+					   "│   ♦  ♦  ♦  ♦  ♦   │\n"
+					   "├───────────────────┤\n"
+					   "│ [0] Retour        │\n"
+					   "└───────────────────┘\n");
+				break;
+			case 107 :
+				printf("┌───────────────────┐\n"
+					   "│       \e[0;32mLaser\e[0m       │\n"
+					   "├───────────────────┤\n"
+					   "│      Attaque      │\n" 
+					   "├───────────────────┤\n"
+					   "│   ♦  ♦  ♦  ○  ○   │\n"
+					   "├───────────────────┤\n"
+					   "│     Precision     │\n"
+					   "├───────────────────┤\n"
+					   "│   ♦  ♦  ♦  ○  ○   │\n"
+					   "├───────────────────┤\n"
+					   "│   Nombre de Tirs  │\n"
+					   "├───────────────────┤\n"
+					   "│   ♦  ○  ○  ○  ○   │\n"
+					   "├───────────────────┤\n"
+					   "│ [0] Retour        │\n"
+					   "└───────────────────┘\n");
+				break;
+			case 108 :
+				printf("┌───────────────────┐\n"
+					   "│     \e[0;32mCannon XM1\e[0m    │\n"
+					   "├───────────────────┤\n"
+					   "│      Attaque      │\n" 
+					   "├───────────────────┤\n"
+					   "│   ♦  ○  ○  ○  ○   │\n"
+					   "├───────────────────┤\n"
+					   "│     Precision     │\n"
+					   "├───────────────────┤\n"
+					   "│   ♦  ♦  ♦  ♦  ○   │\n"
+					   "├───────────────────┤\n"
+					   "│   Nombre de Tirs  │\n"
+					   "├───────────────────┤\n"
+					   "│   ♦  ♦  ○  ○  ○   │\n"
+					   "├───────────────────┤\n"
+					   "│ [0] Retour        │\n"
+					   "└───────────────────┘\n");
 				break;
 		}
 	}
@@ -869,7 +971,7 @@
 		for (int i = 0; i < armes[wpId].nbr_fire; i++){
 			int r = random_nbr(0, 100);
 			if (cible != -1){
-				if (r <= (armes[wpId].accuracy + victor.value - ennemis[ennemyId].speed)){
+				if (r <= (armes[wpId].accuracy + victor.value)){
 					ennemis[ennemyId].shield -= armes[wpId].atk;
 					if (ennemis[ennemyId].shield < 0){
 						ennemis[ennemyId].hull += ennemis[ennemyId].shield;
@@ -880,7 +982,7 @@
 					printf("│ \e[0;91m* Le tir à raté !\e[0m                                             │\n");
 				}
 			}else{
-				if (r <= (armes[wpId].accuracy - atlanta.speed - esquive)){
+				if (r <= (armes[wpId].accuracy - qtal.value - esquive)){
 					atlanta.shield -= armes[wpId].atk;
 					if (atlanta.shield < 0){
 						atlanta.hull += atlanta.shield;
@@ -1305,6 +1407,9 @@
 		int choix = 0;
 		int test = 0;
 		int test1 = 0;
+		displayAtlanta();
+		printf("├───────────────────────────────────────────────────────────────┤\n"
+			   "│ Selectionnez l'arme à remplacer :                             │\n");
 		display(3,2);
 		while (test == 0){
 			scanf("%d",&choix);
@@ -1323,6 +1428,9 @@
 					if (atlanta.weapon1 != 0){
 						system("clear");
 						atlanta.weapon1 = id;
+						displayAtlanta();
+						printf("├───────────────────────────────────────────────────────────────┤\n"
+							   "│ Choix validé !                                                │\n");
 						display(3,2);
 						test1 = 1;
 					}else{
@@ -1333,6 +1441,9 @@
 					if (atlanta.weapon2 != 0){
 						system("clear");
 						atlanta.weapon2 = id;
+						displayAtlanta();
+						printf("├───────────────────────────────────────────────────────────────┤\n"
+							   "│ Choix validé !                                                │\n");
 						display(3,2);
 						test1 = 1;
 					}else{
@@ -1343,6 +1454,9 @@
 					if (atlanta.weapon3 != 0){
 						system("clear");
 						atlanta.weapon3 = id;
+						displayAtlanta();
+						printf("├───────────────────────────────────────────────────────────────┤\n"
+							   "│ Choix validé !                                                │\n");
 						display(3,2);
 						test1 = 1;
 					}else{
@@ -1576,13 +1690,15 @@
 	//Menu scenario
 	void scenario(int niveau, int milieu, int index){
 		int choix = 0;
+		int r = 0;
 		switch (niveau){
 			case 1 :
 				switch (milieu){
 					case 1 :
 						switch (index){
 							case 1:
-								combat(0,milieu);
+								r = random_nbr(0,7);
+								combat(r,milieu);
 								printf("Vous avez gagné !\n");
 								//scanf("%d",&choix);
 								//print
@@ -1594,7 +1710,29 @@
 						}
 						break;
 					case 2:
-						strcpy(&clr[0], "1;92");
+						//couleur de la planète
+						r = random_nbr(1,6);
+						switch (r){
+							case 1:
+								strcpy(&clr[0], "1;91");
+								break;
+							case 2:
+								strcpy(&clr[0], "0;31");
+								break;
+							case 3:
+								strcpy(&clr[0], "1;92");
+								break;
+							case 4:
+								strcpy(&clr[0], "0;36");
+								break;
+							case 5:
+								strcpy(&clr[0], "0;96");
+								break;
+							case 6:
+								strcpy(&clr[0], "1;97");
+								break;
+						}
+						
 						switch (index){
 							case 1:
 								combat(0,milieu);
@@ -1668,7 +1806,7 @@
 			currentEtape = navigation(&world,&etape[currentEtape],currentEtape,monde);
 			//navigation
 			int alea = random_nbr(1,1);
-			scenario(1,world.type[currentEtape],alea);
+			scenario(monde,world.type[currentEtape],alea);
 			//check end
 		}
 	}
@@ -1690,12 +1828,15 @@
 		srand(time(NULL));
 		int end = 0;
 		//menuVaisseau();
-		menuShop(0);
+		//menuShop(0);
 		//displayAtlanta();
 		//generateMap(1);
 		//cycle
 		/*while (end == 0){
 			//generate map
 		}*/
+		for (int i = 1; i<=8; i++){
+			generateMap(i);
+		}
 	return 0;
 	}
