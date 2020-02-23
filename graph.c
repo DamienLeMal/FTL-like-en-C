@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <wchar.h>
 int main()
 {
   char p[] = "0;44";

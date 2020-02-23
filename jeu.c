@@ -12,45 +12,7 @@
 	#include <stdlib.h>
 	#include <time.h>
 
-	//même struct pour les ennemis
-	struct Vaisseau{
-		int id;
-		char nom[30];
-		int weapon1;
-		int weapon2;
-		int weapon3;
-		int hull;
-		int maxHull;
-		int shield;
-		int maxShield;
-		int energy;
-		int maxEnergy;
-		//pour les ennemis, correspondra à la valeur du loot
-		int fuel;
-		int flouze;
-		//0 pour les ennemis
-		int sys[99];
 
-		char color[5];
-	};
-	typedef struct Vaisseau Vaisseau;
-
-	struct Crew{
-		int level;
-		int xp;
-	};
-	typedef struct Crew Crew;
-
-	struct Weapon{
-		int id;
-		char nom[30];
-		int atk;
-		int nbr_fire;
-		int accuracy;
-		int price;
-		char priceChar[5];
-	};
-	typedef struct Weapon Weapon;
 
 	//Donne un point de vue d'ensemble du type de chaque etape pour les dessiner
 	struct World{
@@ -70,6 +32,52 @@
 	};
 	typedef struct Etape Etape;
 
+	//même struct pour les ennemis
+	struct Vaisseau{
+		int id;
+		char nom[30];
+		int weapon1;
+		int weapon2;
+		int weapon3;
+		int hull;
+		int maxHull;
+		int shield;
+		int maxShield;
+		int shieldGain;
+		int energy;
+		int maxEnergy;
+		int energyGain;
+		int speed;
+		//pour les ennemis, correspondra à la valeur du loot
+		int fuel;
+		int flouze;
+		//0 pour les ennemis
+		int sys[99];
+
+		char color[5];
+	};
+	typedef struct Vaisseau Vaisseau;
+
+	struct Crew{
+		int level;
+		int xp;
+		int value;
+	};
+	typedef struct Crew Crew;
+
+	struct Weapon{
+		int id;
+		char nom[30];
+		int atk;
+		int nbr_fire;
+		int accuracy;
+		int price;
+		char priceChar[5];
+		int used;
+		int nrj;
+	};
+	typedef struct Weapon Weapon;
+	
 	//Definit l'agencement des etapes selon un pattern prédéterminé
 	struct Route{
 		int id;
@@ -77,17 +85,17 @@
 		int nbr;
 	};
 	typedef struct Route Route;
+					//id ;nom ;wp1;wp2;wp3;hull;mxHull;shield;mxShield;nrj;mxNrj;sp ; F ; § ; sys ; clr
+	Vaisseau atlanta = {1,"SS Atlanta", 1, 0, 0, 50, 50, 20, 20, 0, 10, 20, 0, 10, 12, 600, {1,1,1,0,0}, "0;44"};
 
-	Vaisseau atlanta = {1,"SS Atlanta", 1, 0, 0, 57, 60, 14, 20, 10, 20, 12, 600, {1,1,1,0,0}, "0;44"};
+	Vaisseau ennemis[99] = {{0,"│ Eclaireur Pyrien │", 1, 0, 0, 40, 40, 10, 10, 5, 10, 10, 5, 10, 2, 12, {0}, "0;101"},{1,"│ Explorer IV │", 1, 0, 0, 80, 80, 10, 10, 2, 10, 20, 10, 12, 14, 22, {0}, "0;101"}};
 
-	Vaisseau ennemis[99] = {{0,"│ Eclaireur Pyrien │", 1, 0, 0, 40, 40, 20, 20, 5, 10, 5, 12, {0}, "0;101"},{1,"│ Explorer IV │", 1, 0, 0, 80, 80, 10, 10, 10, 20, 14, 22, {0}, "0;101"}};
+	Crew james = {0, 1, 5};
+	Crew peter = {0, 1, 5};
+	Crew victor = {0, 1, 5};
+	Crew qtal = {0, 1, 5};
 
-	Crew james = {0, 1};
-	Crew peter = {0, 1};
-	Crew victor = {0, 1};
-	Crew qtal = {0, 1};
-
-	Weapon armes[99] = {{0, "", 0, 0, 0, 0, ""},{1, "Cannon à Ions", 20, 2, 80, 200, "200"}};
+	Weapon armes[99] = {{0, "", 0, 0, 0, 0, "", -1, 0},{1, "Cannon à Ions ", 10 /*2 digits*/, 2, 80, 150, "150", 0, 3},{2, "Vieux Cannon", 20 , 1, 60, 100, "100", 0, 3},{3, "Gatling", 10 , 5, 40, 160, "160", 0, 3},{4, "Vieux Missile", 15 , 1, 100, 150, "150", 0, 3}};
 
 	char clr[] = "1;91";
 
@@ -102,7 +110,7 @@
 		int lenght = strlen(array);
 		int limit = max_lenght - lenght;
 		if (dir == 0){
-			printf("%s ", &array[0]);
+			printf("%s", &array[0]);
 		}
 		for (int i = 0; i <= limit; i++) {
 			printf("%s", &btw[0]);
@@ -114,10 +122,10 @@
 	void printSystemShop(int index, int sub){
 		switch (index){
 			case 3:
-				printf("│ [%d] \e[40mExtension d'arme 2\e[0m -------------------------------- 500 § │\n",sub);
+				printf("│ [%d] \e[40mExtension d'arme 2\e[0m -------------------------------- 300 § │\n",sub);
 				break;
 			case 4:
-				printf("│ [%d] \e[40mExtension d'arme 3\e[0m -------------------------------- 500 § │\n",sub);
+				printf("│ [%d] \e[40mExtension d'arme 3\e[0m -------------------------------- 300 § │\n",sub);
 				break;
 		}
 	}
@@ -131,8 +139,20 @@
 				printf("│ [%s] \e[3mNon assigné\e[0m      │                                        │\n", &nbr[0]);
 				break;
 			case 1:
-				printf("│ [%s] Cannon à Ions    │ \e[3mCe cannon électrique est capable de    \e[0m│\n"
-					   "│                      │ \e[3mtranspercer n'importe quel blindage !  \e[0m│\n", &nbr[0]);
+				printf("│ [%s] \e[1;92mCannon à Ions\e[0m    │ \e[3mCe cannon électrique est capable de    \e[0m│\n"
+					   "│  Coût Energie : 3    │ \e[3mtranspercer n'importe quel blindage !  \e[0m│\n", &nbr[0]);
+				break;
+			case 2:
+				printf("│ [%s] \e[1;92mVieux Cannon\e[0m     │ \e[3mCe cannon date d'une autre époque mais \e[0m│\n"
+					   "│  Coût Energie : 3    │ \e[3mil fonctionne encore !                 \e[0m│\n", &nbr[0]);
+				break;
+			case 3:
+				printf("│ [%s] \e[1;92mGatling\e[0m          │ \e[3mUne arme normalement terrestre qui     \e[0m│\n"
+					   "│  Coût Energie : 3    │ \e[3mfonctionne tout de même dans l'espace  \e[0m│\n", &nbr[0]);
+				break;
+			case 4:
+				printf("│ [%s] \e[1;92mVieux Missile\e[0m    │ \e[3mCe lance missile ne fait que peu de    \e[0m│\n"
+					   "│  Coût Energie : 3    │ \e[3mdégats mais il ne rate jamais sa cible \e[0m│\n", &nbr[0]);
 				break;
 			//id systems + 30
 			case 31:
@@ -152,7 +172,7 @@
 				break;
 			case 101 :
 			printf("┌───────────────────┐\n"
-				   "│   Cannon à Ions   │\n"
+				   "│   \e[1;92mCannon à Ions\e[0m   │\n"
 				   "├───────────────────┤\n"
 				   "│      Attaque      │\n" 
 				   "├───────────────────┤\n"
@@ -165,6 +185,63 @@
 				   "│   Nombre de Tirs  │\n"
 				   "├───────────────────┤\n"
 				   "│   ♦  ♦  ○  ○  ○   │\n"
+				   "├───────────────────┤\n"
+				   "│ [0] Retour        │\n"
+				   "└───────────────────┘\n");
+				break;
+			case 102 :
+			printf("┌───────────────────┐\n"
+				   "│    \e[1;92mVieux Cannon\e[0m   │\n"
+				   "├───────────────────┤\n"
+				   "│      Attaque      │\n" 
+				   "├───────────────────┤\n"
+				   "│   ♦  ○  ○  ○  ○   │\n"
+				   "├───────────────────┤\n"
+				   "│     Precision     │\n"
+				   "├───────────────────┤\n"
+				   "│   ♦  ♦  ♦  ○  ○   │\n"
+				   "├───────────────────┤\n"
+				   "│   Nombre de Tirs  │\n"
+				   "├───────────────────┤\n"
+				   "│   ♦  ○  ○  ○  ○   │\n"
+				   "├───────────────────┤\n"
+				   "│ [0] Retour        │\n"
+				   "└───────────────────┘\n");
+				break;
+			case 103 :
+			printf("┌───────────────────┐\n"
+				   "│      \e[1;92mGatling\e[0m      │\n"
+				   "├───────────────────┤\n"
+				   "│      Attaque      │\n" 
+				   "├───────────────────┤\n"
+				   "│   ♦  ○  ○  ○  ○   │\n"
+				   "├───────────────────┤\n"
+				   "│     Precision     │\n"
+				   "├───────────────────┤\n"
+				   "│   ♦  ♦  ♦  ○  ○   │\n"
+				   "├───────────────────┤\n"
+				   "│   Nombre de Tirs  │\n"
+				   "├───────────────────┤\n"
+				   "│   ♦  ♦  ♦  ♦  ♦   │\n"
+				   "├───────────────────┤\n"
+				   "│ [0] Retour        │\n"
+				   "└───────────────────┘\n");
+				break;
+			case 104 :
+			printf("┌───────────────────┐\n"
+				   "│   \e[1;92mVieux Missile\e[0m   │\n"
+				   "├───────────────────┤\n"
+				   "│      Attaque      │\n" 
+				   "├───────────────────┤\n"
+				   "│   ♦  ○  ○  ○  ○   │\n"
+				   "├───────────────────┤\n"
+				   "│     Precision     │\n"
+				   "├───────────────────┤\n"
+				   "│   ♦  ♦  ♦  ♦  ♦   │\n"
+				   "├───────────────────┤\n"
+				   "│   Nombre de Tirs  │\n"
+				   "├───────────────────┤\n"
+				   "│   ♦  ○  ○  ○  ○   │\n"
 				   "├───────────────────┤\n"
 				   "│ [0] Retour        │\n"
 				   "└───────────────────┘\n");
@@ -480,10 +557,44 @@
 						}
 						printf("└──────────────────────────────┴────────────────────────────────┘\n");
 						break;
-
 				}
 		}
 	}
+
+	void displayAtlanta(){
+		printf("                 ┌──────────────────────────────┐\n" 
+			   "                 │ █▀█ ▀█▀ █   █▀█ █▄ █ ▀█▀ █▀█ │\n"
+			   "                 │ █▀█  █  █▄▄ █▀█ █ ▀█  █  █▀█ │\n"
+			   "┌────────────────┴──────────────────────────────┴───────────────┐\n"
+			   "│");
+		int nbr = (63 * atlanta.shield)/atlanta.maxShield;
+		for (int i = 0; i < nbr; i++){
+			printf("\e[0;94m▄");
+		}
+		for (int i = 0; i < 63 - nbr; i++){
+			printf("\e[0;90m▄");
+		}
+		printf("\e[0m│\n│");
+		nbr = (63 * atlanta.hull)/atlanta.maxHull;
+		for (int i = 0; i < nbr; i++){
+			printf("\e[0;93m▄\e[0m");
+		}
+		for (int i = 0; i < 63 - nbr; i++){
+			printf("\e[0;90m▄\e[0m");
+		}
+		printf("│\n│");
+		for (int i = 0; i < nbr; i++){
+			printf("\e[0;93m▀\e[0m");
+		}
+		for (int i = 0; i < 63 - nbr; i++){
+			printf("\e[0;90m▀\e[0m");
+		}
+		printf("│\n");
+
+		//63 de long
+		//\e[0;94m shield _____ \e[0;93m vie
+	}
+
 	void printMap (World * w, int monde) {
 		char milieuPrint[99][99];
 		system("clear");
@@ -543,7 +654,8 @@
 					break;
 			}
 		}
-		printf("┌───────────────────────────────────────────────────────────────┐\n"
+		displayAtlanta();
+		printf("├───────────────────────────────────────────────────────────────┤\n"
 			   "│                      ---─── Monde %d ───---                    │\n"
 			   "├───────────────────────────────────────────────────────────────┤\n"
 			   "│   0      1      2      3      4      5      6      7      8   │\n"
@@ -618,41 +730,6 @@
 		printf("└───────────────────────────────────────────────────────────────┘\n");
 	}
 
-	void displayAtlanta(){
-		printf("				 ┌──────────────────────────────┐\n" 
-			   "				 │ █▀█ ▀█▀ █   █▀█ █▄ █ ▀█▀ █▀█ │\n"
-			   "				 │ █▀█  █  █▄▄ █▀█ █ ▀█  █  █▀█ │\n"
-			   "┌────────────────┴──────────────────────────────┴───────────────┐\n"
-			   "│");
-		int nbr = (63 * atlanta.shield)/atlanta.maxShield;
-		for (int i = 0; i < nbr; i++){
-			printf("\e[0;94m▄");
-		}
-		for (int i = 0; i < 63 - nbr; i++){
-			printf("\e[0;90m▄");
-		}
-		printf("\e[0m│\n│");
-		nbr = (63 * atlanta.hull)/atlanta.maxHull;
-		for (int i = 0; i < nbr; i++){
-			printf("\e[0;93m▄\e[0m");
-		}
-		for (int i = 0; i < 63 - nbr; i++){
-			printf("\e[0;90m▄\e[0m");
-		}
-		printf("│\n│");
-		for (int i = 0; i < nbr; i++){
-			printf("\e[0;93m▀\e[0m");
-		}
-		for (int i = 0; i < 63 - nbr; i++){
-			printf("\e[0;90m▀\e[0m");
-		}
-		printf("│\n");
-
-		//63 de long
-		//\e[0;94m shield _____ \e[0;93m vie
-	}
-
-
 	void displayEnnemy(Vaisseau * v){
 		int count = 0;
 		//strcpy(lenV, (*v).nom);
@@ -717,15 +794,135 @@
 		printf("   │\n");
 	}
 
+	void drops(ennemyId, etape){
+		int test = 1;
+		system("clear");
+		displayAtlanta();
+		display(5,etape);
+		printf("├───────────────────────────────────────────────────────────────┤\n"
+			   "│                                                               │\n");
+		atlanta.fuel += ennemis[ennemyId].fuel;
+		atlanta.flouze += ennemis[ennemyId].flouze;
+		if (ennemis[ennemyId].fuel < 10 && ennemis[ennemyId].flouze < 10) {
+			printf("│ * Vous récoltez %d Fuel et %d Crédits dans la carcasse du       │\n",ennemis[ennemyId].fuel,ennemis[ennemyId].flouze);
+		}else if (ennemis[ennemyId].fuel > 10 && ennemis[ennemyId].flouze > 10){
+			printf("│ * Vous récoltez %d Fuel et %d Crédits dans la carcasse du     │\n",ennemis[ennemyId].fuel,ennemis[ennemyId].flouze);
+		}else{
+			printf("│ * Vous récoltez %d Fuel et %d Crédits dans la carcasse du      │\n",ennemis[ennemyId].fuel,ennemis[ennemyId].flouze);
+		}
+		printf("│   vaisseau ennemis !                                          │\n");
+		int xp = random_nbr(2,6);
+		printf("│ * James remporte %d xp !                                       │\n", xp);
+		james.xp += xp;
+		if (james.xp > 35){
+			james.xp -= 35;
+			james.level += 1;
+			james.value += 5;
+			printf("│ * James gagne un niveau ! L'efficacité du bouclier augmente ! │\n");
+		}
+		printf("│                                                               │\n");
+		xp = random_nbr(2,6);
+		printf("│ * Peter remporte %d xp !                                       │\n", xp);
+		peter.xp += xp;
+		if (peter.xp > 35){
+			peter.xp -= 35;
+			peter.level += 1;
+			peter.value += 2;
+			printf("│ * Peter gagne un niveau ! La génération d'énergie augmente !  │\n");
+		}
+		printf("│                                                               │\n");
+		xp = random_nbr(2,6);
+		printf("│ * Victor remporte %d xp !                                      │\n", xp);
+		victor.xp += xp;
+		if (victor.xp > 35){
+			victor.xp -= 35;
+			victor.level += 1;
+			victor.value += 5;
+			printf("│ * Victor gagne un niveau ! La précision des tirs augmente !   │\n");
+		}
+		printf("│                                                               │\n");
+		xp = random_nbr(2,6);
+		printf("│ * Qk'tal remporte %d xp !                                      │\n", xp);
+		victor.xp += xp;
+		if (victor.xp > 35){
+			victor.xp -= 35;
+			victor.level += 1;
+			victor.value += 5;
+			printf("│ * Qk'tal gagne un niveau ! Les chances d'esquive augmentent !  │\n");
+		}
+		printf("│                                                               │\n"
+			   "├───────────────────────────────────────────────────────────────┤\n"
+			   "│ [0] Suite                                                     │\n"
+			   "└───────────────────────────────────────────────────────────────┘\n");
+		while (test != 0){
+			scanf("%d",&test);
+		}
+	}
+//int id;	char nom[30];	int atk;	int nbr_fire;	int accuracy;	int price;	char priceChar[5];
+	void attaque(int wpId, int etape, int cible, int ennemyId, int esquive){
+		system("clear");
+		displayAtlanta();
+		displayEnnemy(&ennemis[ennemyId]);
+		display(5,etape);
+		printf("├───────────────────────────────────────────────────────────────┤\n"
+			   "│                                                               │\n");
+		for (int i = 0; i < armes[wpId].nbr_fire; i++){
+			int r = random_nbr(0, 100);
+			if (cible != -1){
+				if (r <= (armes[wpId].accuracy + victor.value - ennemis[ennemyId].speed)){
+					ennemis[ennemyId].shield -= armes[wpId].atk;
+					if (ennemis[ennemyId].shield < 0){
+						ennemis[ennemyId].hull += ennemis[ennemyId].shield;
+						ennemis[ennemyId].shield = 0;
+					}
+					printf("│ \e[0;92m* L'ennemis prends %d points de dégats !\e[0m                      │\n",armes[wpId].atk);
+				}else{
+					printf("│ \e[0;91m* Le tir à raté !\e[0m                                             │\n");
+				}
+			}else{
+				if (r <= (armes[wpId].accuracy - atlanta.speed - esquive)){
+					atlanta.shield -= armes[wpId].atk;
+					if (atlanta.shield < 0){
+						atlanta.hull += atlanta.shield;
+						atlanta.shield = 0;
+					}
+					printf("│ \e[0;91m* Vous prennez %d points de dégats !\e[0m                          │\n",armes[wpId].atk);
+				}else{
+					printf("│ \e[0;92m* Ce tir à raté !\e[0m                                             │\n");
+				}
+			}
+			printf("│                                                               │\n");
+		}
+		display(3,4);
+		display(3,5);
+		int choix = 1;
+		while (choix != 0){
+			scanf("%d", &choix);
+		}
+	}
+
 	void combat(int ennemyId, int etape){
 		int tour = 1;
 		int choix = 0;
+		int choix1 = 0;
+		int test = 0;
+		int dodge = 0;
 		ennemis[ennemyId].hull = ennemis[ennemyId].maxHull;
 		ennemis[ennemyId].shield = ennemis[ennemyId].maxShield;
 		ennemis[ennemyId].energy = ennemis[ennemyId].maxEnergy/2;
 		atlanta.energy = atlanta.maxEnergy/2;
-		while ((atlanta.hull > 0) || (ennemis[ennemyId].hull > 0)){
+		while ((atlanta.hull > 0) && (ennemis[ennemyId].hull > 0)){
 			choix = 0;
+			tour = 1;
+			if (armes[atlanta.weapon1].used == 1){
+			 	armes[atlanta.weapon1].used = 0;
+			}
+			if (armes[atlanta.weapon2].used == 1){
+			 	armes[atlanta.weapon2].used = 0;
+			}
+			if (armes[atlanta.weapon3].used == 1){
+				armes[atlanta.weapon3].used = 0;
+			}
 			while (tour == 1){
 				switch (choix){
 					case 0:
@@ -738,20 +935,107 @@
 						break;
 					case 1:
 						//attaque
+						test = 0;
 						system("clear");
 						displayAtlanta();
 						displayEnnemy(&ennemis[ennemyId]);
 						display(5,etape);
 						display(3,2);
-						scanf("%d",&choix);
+						while (test == 0){
+							scanf("%d",&choix1);
+							switch (choix1){
+								case 0:
+									test = 1;
+									choix = 0;
+									break;
+								case 1:
+									if (armes[atlanta.weapon1].used == 0){
+										if (atlanta.energy >= armes[atlanta.weapon1].nrj){
+											attaque(atlanta.weapon1, etape, ennemyId, ennemyId, 0);
+											armes[atlanta.weapon1].used = 1;
+											atlanta.energy -= armes[atlanta.weapon1].nrj;
+											choix = 0;
+											test = 1;
+										}else{
+											printf("Pas assez d'énergie !\n");
+										}
+									}else{
+										printf("Vous ne pouvez pas utiliser deux fois la même arme dans le même tour !\n");
+									}
+									break;
+								case 2:
+									if (armes[atlanta.weapon2].used == 0){
+										if (atlanta.energy >= armes[atlanta.weapon2].nrj){
+											attaque(atlanta.weapon2, etape, ennemyId, ennemyId, 0);
+											armes[atlanta.weapon2].used = 1;
+											atlanta.energy -= armes[atlanta.weapon2].nrj;
+											choix = 0;
+											test = 1;
+										}else{
+											printf("Pas assez d'énergie !\n");
+										}
+									}else if (armes[atlanta.weapon2].used == -1){
+										printf("Choix Invalide\n");
+									}else{
+										printf("Vous ne pouvez pas utiliser deux fois la même arme dans le même tour !\n");
+									}
+									break;
+								case 3:
+									if (armes[atlanta.weapon3].used == 0){
+										if (atlanta.energy >= armes[atlanta.weapon3].nrj){
+											attaque(atlanta.weapon3, etape, ennemyId, ennemyId, 0);
+											armes[atlanta.weapon3].used = 1;
+											atlanta.energy -= armes[atlanta.weapon3].nrj;
+											choix = 0;
+											test = 1;
+										}else{
+											printf("Pas assez d'énergie !\n");
+										}
+									}else if (armes[atlanta.weapon3].used == -1){
+										printf("Choix Invalide\n");
+									}else{
+										printf("Vous ne pouvez pas utiliser deux fois la même arme dans le même tour !\n");
+									}
+									break;
+								default:
+									printf("Choix Invalide\n");
+									break;
+							}
+						}
+						if (ennemis[ennemyId].hull <= 0){
+							drops(ennemyId, etape);
+							return;
+						}
 						break;
 					case 2:
 						//esquive
-						system("clear");
+						if (dodge == 0){
+							dodge = qtal.value * 2;
+							atlanta.fuel -= 2;
+							system("clear");
+							choix = 0;
+						}else{
+							printf("Choix impossible\n");
+							choix = 0;
+						}
 						break;
 					case 3:
 						//shield
 						system("clear");
+						displayAtlanta();
+						displayEnnemy(&ennemis[ennemyId]);
+						display(5,etape);
+						printf("├───────────────────────────────────────────────────────────────┤\n"
+			   			       "│                                                               │\n"
+			   			       "│  \e[0;92m* Le Bouclier se régénèrera davantage ce tour-ci !\e[0m           │\n"
+			   			       "│                                                               │\n"
+			   			       "│                                                               │\n"
+			   			       "│                                                               │\n"
+			   			       "├───────────────────────────────────────────────────────────────┤\n"
+			   			       "│ [0] Retour                                                    │\n"
+			   			       "└───────────────────────────────────────────────────────────────┘\n");
+						atlanta.shieldGain += atlanta.shield/2;
+						atlanta.energy -= 5;
 						break;
 					case 4:
 						//Fin de tour
@@ -765,25 +1049,182 @@
 						break;
 				}
 			}
-			//Display encounter
-		//menu display combat
-			//voir Etat Coque + Bouclier
-			//voir Energie disponible
-			//voir actions possibles
-		
-	//Combat (struct toi, struct mechant)
-		//while
-			//Afficher menu combat
-			//Choix
-			//impact sur l'ennemis
-			//choix ennemis
-			//impact sur toi
-		//end While
-		//Regeneration du shield
-		}
-		if (atlanta.hull <= 0){
-			//print GameOver
-			//Quit game
+			//tour ennemis
+			int cumul = 0;
+			for (int i = 3; i > 0; i--){
+				system("clear");
+				if (i == 3){
+					if (ennemis[ennemyId].energy >= armes[ennemis[ennemyId].weapon3].nrj && (armes[ennemis[ennemyId].weapon3].nrj != 0)) {
+						attaque(ennemis[ennemyId].weapon3, etape, -1, ennemyId, dodge);
+						ennemis[ennemyId].energy -= armes[ennemis[ennemyId].weapon3].nrj;
+					}else{
+						cumul += 1;
+					}
+				}else if (i == 2){
+					if (ennemis[ennemyId].energy >= armes[ennemis[ennemyId].weapon2].nrj && (armes[ennemis[ennemyId].weapon2].nrj != 0)) {
+						attaque(ennemis[ennemyId].weapon2, etape, -1, ennemyId, dodge);
+						ennemis[ennemyId].energy -= armes[ennemis[ennemyId].weapon2].nrj;
+					}else{
+						cumul += 1;
+					}
+				}else if (i == 1){
+					if (ennemis[ennemyId].energy >= armes[ennemis[ennemyId].weapon1].nrj && (armes[ennemis[ennemyId].weapon1].nrj != 0)) {
+						attaque(ennemis[ennemyId].weapon1, etape, -1, ennemyId, dodge);
+						ennemis[ennemyId].energy -= armes[ennemis[ennemyId].weapon1].nrj;
+					}else{
+						cumul += 1;
+					}
+				}
+			}
+			dodge = 0;
+			if (cumul == 3){
+				system("clear");
+				displayAtlanta();
+				displayEnnemy(&ennemis[ennemyId]);
+				display(5,etape);
+				printf("├───────────────────────────────────────────────────────────────┤\n"
+			   		   "│                                                               │\n"
+			   		   "│  \e[0;92mL'ennemis n'a pas pu attaquer ce tour !\e[0m                      │\n"
+			   		   "│                                                               │\n"
+			   		   "│                                                               │\n"
+			   		   "│                                                               │\n"
+			   		   "├───────────────────────────────────────────────────────────────┤\n"
+			   		   "│ [0] Suite                                                     │\n"
+			   		   "└───────────────────────────────────────────────────────────────┘\n");
+				choix1 = 1;
+				while (choix1 != 0){
+					scanf("%d",&choix1);
+				}
+			}
+			system("clear");
+			if (atlanta.hull < 0){
+				atlanta.hull = 0;
+				printf("┌───────────────────────────────────────────────────────────────┐\n"
+					   "│                           Game Over                           │\n"
+					   "└───────────────────────────────────────────────────────────────┘\n");
+				exit(0);
+			}
+			//Fin tour
+			switch (etape) {
+				case 1://solei
+					atlanta.hull -= 5;
+					ennemis[ennemyId].hull -= 5;
+					displayAtlanta();
+					displayEnnemy(&ennemis[ennemyId]);
+					display(5,etape);
+					printf("├───────────────────────────────────────────────────────────────┤\n"
+			   			   "│                                                               │\n"
+			   			   "│ \e[0;91m* Les rayons solaire font perdre 5 points à l'Atlanta\e[0m         │\n"
+			   			   "│                                                               │\n"
+			   			   "│ \e[0;92m* Les rayons solaire font perdre 5 points à l'ennemis\e[0m         │\n"
+			   			   "│                                                               │\n"
+			   			   "├───────────────────────────────────────────────────────────────┤\n"
+			   			   "│ [0] Suite                                                     │\n"
+			   			   "└───────────────────────────────────────────────────────────────┘\n");
+					break;
+				case 2://planete
+					displayAtlanta();
+					displayEnnemy(&ennemis[ennemyId]);
+					display(5,etape);
+					printf("├───────────────────────────────────────────────────────────────┤\n"
+			   			   "│                                                               │\n"
+			   			   "│                                                               │\n"
+			   			   "│                                                               │\n"
+			   			   "│                                                               │\n"
+			   			   "│                                                               │\n"
+			   			   "├───────────────────────────────────────────────────────────────┤\n"
+			   			   "│ [0] Suite                                                     │\n"
+			   			   "└───────────────────────────────────────────────────────────────┘\n");
+					break;
+				case 3://asteroid
+					displayAtlanta();
+					displayEnnemy(&ennemis[ennemyId]);
+					display(5,etape);
+					printf("├───────────────────────────────────────────────────────────────┤\n"
+			   			   "│                                                               │\n");
+					int r1 = random_nbr(1,2);
+					if (r1 == 1) {
+						atlanta.shield -= 20;
+						if (atlanta.shield < 0){
+							atlanta.hull += atlanta.shield;
+							atlanta.shield = 0;
+						}
+						if (atlanta.hull < 0){
+							atlanta.hull = 0;
+						}
+						printf("│ \e[0;91m* Vous percutez un astéroïde et prennez 20 points de dégats !\e[0m │\n");
+					}else{
+						printf("│                                                               │\n");
+					}
+					printf("│                                                               │\n");
+					r1 = random_nbr(1,2);
+					if (r1 == 1) {
+						ennemis[ennemyId].shield -= 20;
+						if (ennemis[ennemyId].shield < 0){
+							ennemis[ennemyId].hull += ennemis[ennemyId].shield;
+							ennemis[ennemyId].shield = 0;
+						}
+						if (ennemis[ennemyId].hull < 0){
+							ennemis[ennemyId].hull = 0;
+						}
+						printf("│ \e[0;92m* L'ennemis percute un astéroïde, 20 points de dégats !\e[0m       │\n");
+					}else{
+						printf("│                                                               │\n");
+					}
+					printf("│                                                               │\n"
+						   "├───────────────────────────────────────────────────────────────┤\n"
+			   			   "│ [0] Suite                                                     │\n"
+			   			   "└───────────────────────────────────────────────────────────────┘\n");
+					break;
+				case 4://vide
+					displayAtlanta();
+					displayEnnemy(&ennemis[ennemyId]);
+					display(5,etape);
+					atlanta.energyGain = peter.value/2;
+					printf("├───────────────────────────────────────────────────────────────┤\n"
+			   			   "│                                                               │\n"
+			   			   "│  \e[0;94mLe Manque de lumière environnante ralentit la récupération\e[0m   │\n"
+			   			   "│                                                               │\n"
+			   			   "│  \e[0;94md'énergie !\e[0m                                                  │\n"
+			   			   "│                                                               │\n"
+			   			   "├───────────────────────────────────────────────────────────────┤\n"
+			   			   "│ [0] Suite                                                     │\n"
+			   			   "└───────────────────────────────────────────────────────────────┘\n");
+					break;
+			}
+			atlanta.energy += (atlanta.energyGain + peter.value);
+			if (atlanta.energy > atlanta.maxEnergy){
+				atlanta.energy = atlanta.maxEnergy;
+			}
+			atlanta.shield += (atlanta.shieldGain + james.value);
+			if (atlanta.shield > atlanta.maxShield){
+				atlanta.shield = atlanta.maxShield;
+			}
+			ennemis[ennemyId].energy += ennemis[ennemyId].energyGain;
+			if (ennemis[ennemyId].energy > ennemis[ennemyId].maxEnergy){
+				ennemis[ennemyId].energy = ennemis[ennemyId].maxEnergy;
+			}
+			ennemis[ennemyId].shield += ennemis[ennemyId].shieldGain;
+			if (ennemis[ennemyId].shield > ennemis[ennemyId].maxShield){
+				ennemis[ennemyId].shield = ennemis[ennemyId].maxShield;
+			}
+			choix = 1;
+			if (ennemis[ennemyId].hull < 0){
+				ennemis[ennemyId].hull = 0;
+				drops(ennemyId, etape);
+				return;
+			}
+			if (atlanta.hull < 0){
+				atlanta.hull = 0;
+				system("clear");
+				printf("┌───────────────────────────────────────────────────────────────┐\n"
+					   "│                           Game Over                           │\n"
+					   "└───────────────────────────────────────────────────────────────┘\n");
+				exit(0);
+			}
+			while (choix != 0){
+				scanf("%d",&choix);
+			}
 		}
 	}
 
@@ -923,15 +1364,15 @@
 		int test1 = 0;
 		int test2 = 1;
 		int test3 = 0;
-		int level[][12] = {{1,1,1,1,1,1,1,1,3,3,4,4},
-						   {0,0,0,0,0,0,0,0,0,0,0,0},
-						   {0,0,0,0,0,0,0,0,0,0,0,0},
-						   {0,0,0,0,0,0,0,0,0,0,0,0},
-						   {0,0,0,0,0,0,0,0,0,0,0,0},
-						   {0,0,0,0,0,0,0,0,0,0,0,0},
-						   {0,0,0,0,0,0,0,0,0,0,0,0},
-						   {0,0,0,0,0,0,0,0,0,0,0,0}};
-		   //Items pool    //Weapons       ║Systems
+		int level[][12] = {{1,2,3,4,5,6,7,8,3,3,4,4},
+						   {5,6,7,8,9,10,11,12,0,0,0,0},
+						   {9,10,11,12,13,14,15,16,0,0,0,0},
+						   {13,14,15,16,17,18,19,20,0,0,0,0},
+						   {17,18,19,20,21,22,23,24,0,0,0,0},
+						   {20,21,22,23,24,25,26,27,0,0,0,0},
+						   {23,24,25,26,27,28,29,30,0,0,0,0},
+						   {23,24,25,26,27,28,29,30,0,0,0,0}};
+		   //Items pool    // 8 Weapons            ║4 Systems
 		int randWeapon[3];
 		int randSys[2];
 		//Afficher 3 armes et 2 systèmes + constante de fuel
@@ -1088,18 +1529,18 @@
 								system("clear");
 								break;
 							case 1:
-								if (atlanta.flouze >= 500){
+								if (atlanta.flouze >= 300){
 									atlanta.sys[level[pool][randSys[0]]] = 1;
-									atlanta.flouze -= 500;
+									atlanta.flouze -= 300;
 									system("clear");
 								}else{
 									printf("Pas assez de Crédits !\n");
 								}
 								break;
 							case 2:
-								if (atlanta.flouze >= 500){
+								if (atlanta.flouze >= 300){
 									atlanta.sys[level[pool][randSys[1]]] = 1;
-									atlanta.flouze -= 500;
+									atlanta.flouze -= 300;
 									system("clear");
 								}else{
 									printf("Pas assez de Crédits !\n");
@@ -1142,6 +1583,7 @@
 						switch (index){
 							case 1:
 								combat(0,milieu);
+								printf("Vous avez gagné !\n");
 								//scanf("%d",&choix);
 								//print
 								//choix ou arboressence de choix
@@ -1248,13 +1690,12 @@
 		srand(time(NULL));
 		int end = 0;
 		//menuVaisseau();
-		//menuShop(0);
+		menuShop(0);
 		//displayAtlanta();
-		generateMap(1);
+		//generateMap(1);
 		//cycle
 		/*while (end == 0){
 			//generate map
-			
 		}*/
 	return 0;
 	}
