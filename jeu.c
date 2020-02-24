@@ -1,18 +1,7 @@
-	/*
-
-		main 
-			generate_map
-				niveau
-					navigation
-						printMap
-
-	*/
 	#include <stdio.h>
 	#include <string.h>
 	#include <stdlib.h>
 	#include <time.h>
-
-
 
 	//Donne un point de vue d'ensemble du type de chaque etape pour les dessiner
 	struct World{
@@ -47,13 +36,11 @@
 		int energy;
 		int maxEnergy;
 		int energyGain;
-		int speed;
 		//pour les ennemis, correspondra à la valeur du loot
 		int fuel;
 		int flouze;
 		//0 pour les ennemis
 		int sys[99];
-
 		char color[5];
 	};
 	typedef struct Vaisseau Vaisseau;
@@ -85,20 +72,31 @@
 		int nbr;
 	};
 	typedef struct Route Route;
-					//id ;nom ;wp1;wp2;wp3;hull;mxHull;shield;mxShield;nrj;mxNrj;sp ; F ; § ; sys ; clr
-	Vaisseau atlanta = {1,"SS Atlanta", 1, 0, 0, 50, 50, 20, 20, 0, 10, 20, 0, 10, 12, 600, {1,1,1,0,0}, "0;44"};
+					//id ;nom ;wp1;wp2;wp3;hull;mxHull;shield;mxShield;shieldGain;nrj;mxNrj;nrjGain;sp ; F ; § ; sys ; clr
+	Vaisseau atlanta = {1,"SS Atlanta", 1, 0, 0, 50, 50, 20, 20, 0, 10, 20, 0, 12, 600, {1,1,1,0,0}, "0;44"};
 
-	Vaisseau ennemis[99] = {{0,"│ Eclaireur Pyrien │", 1, 0, 0, 40, 40, 10, 10, 5, 10, 10, 5, 10, 2, 12, {0}, "0;101"},{1,"│ Explorer IV │", 1, 0, 0, 80, 80, 10, 10, 2, 10, 20, 10, 12, 14, 22, {0}, "0;101"}};
+	Vaisseau ennemis[99] = {{0,"│ Eclaireur Pyrien │", 1, 0, 0, 40, 40, 10, 10, 5, 10, 10, 5, 4, 11, {0}, "0;101"},
+							{1,"│ Satellite │", 1, 0, 0, 40, 40, 20, 20, 5, 10, 10, 5, 2, 12, {0}, "43"},
+							{2,"│ Eclaireur Pyrien │", 2, 0, 0, 40, 40, 10, 10, 5, 10, 10, 5, 1, 15, {0}, "0;101"},
+							{3,"│ Vagabond │", 2, 0, 0, 20, 20, 40, 40, 5, 10, 10, 5, 2, 13, {0}, "0;101"},
+							{4,"│ Drone de Recherches │", 3, 0, 0, 40, 40, 10, 10, 5, 10, 10, 5, 1, 11, {0}, "0;101"},
+							{5,"│ Eclaireur Pyrien │", 3, 0, 0, 40, 40, 10, 10, 5, 10, 10, 5, 3, 14, {0}, "0;101"},
+							{6,"│ Tellordiens │", 4, 0, 0, 15, 15, 30, 30, 10, 10, 10, 5, 2, 12, {0}, "0;101"},
+							{7,"│ Eclaireur Pyrien │", 4, 0, 0, 40, 40, 10, 10, 5, 10, 10, 5, 4, 5, {0}, "0;101"}
+						};
 
 	Crew james = {0, 1, 5};
 	Crew peter = {0, 1, 5};
 	Crew victor = {0, 1, 5};
 	Crew qtal = {0, 1, 5};
 
-	Weapon armes[99] = {{0, "", 0, 0, 0, 0, "", -1, 0},{1, "Cannon à Ions ", 10 /*2 digits*/, 2, 80, 150, "150", 0, 3},{2, "Vieux Cannon", 20 , 1, 60, 100, "100", 0, 3},{3, "Gatling", 10 , 5, 40, 160, "160", 0, 3},{4, "Vieux Missile", 15 , 1, 100, 150, "150", 0, 3}};
+	Weapon armes[99] = {{0, "", 0, 0, 0, 0, "", -1, 0},{1, "Cannon à Ions  ", 10 /*2 digits*/, 2, 80, 150, "150", 0, 3},{2, "Vieux Cannon", 20 , 1, 60, 100, "100", 0, 3},{3, "Gatling", 10 , 5, 30, 160, "160", 0, 3},{4, "Vieux Missile", 15 , 1, 100, 150, "150", 0, 3},//tier D
+													   {5, "Cannon à Pulsion", 20, 3, 50, 200, "220", 0, 4},{6, "Gatling à Proton", 20, 5, 40, 200, "200", 0, 4},{7, "Laser ", 40, 1, 60, 200, "200", 0, 4},{8, "Cannon XM1", 15, 2, 80, 190, "190", 0, 4},//tier C
+													   //{5, "Cannon à impulsion", 20, 3, 50, 200, "220", 0, 4},{6, "Gatling à Proton", 20, 5, 40, 200, "200", 0, 4},{7, "Laser ", 40, 1, 60, 200, "200", 0, 4},{8, "Cannon XM1", 15, 2, 80, 190, "190", 0, 4},
+													};
 
 	char clr[] = "1;91";
-
+	char sclr[] = "1;91";
 	//random
 	int random_nbr (int min, int max){
 		int nbr = 0;
@@ -154,6 +152,22 @@
 				printf("│ [%s] \e[1;92mVieux Missile\e[0m    │ \e[3mCe lance missile ne fait que peu de    \e[0m│\n"
 					   "│  Coût Energie : 3    │ \e[3mdégats mais il ne rate jamais sa cible \e[0m│\n", &nbr[0]);
 				break;
+			case 5:
+				printf("│ [%s] \e[0;32mCannon à Pulsion\e[0m │ \e[3mCe cannon fonctionne par pulsions      \e[0m│\n"
+					   "│  Coût Energie : 4    │ \e[3mélectro-magnétiques                    \e[0m│\n", &nbr[0]);
+				break;
+			case 6:
+				printf("│ [%s] \e[0;32mGatling à Photon\e[0m │ \e[3mCette gatling fonctionne grâce à la    \e[0m│\n"
+					   "│  Coût Energie : 4    │ \e[3mlumière émise par ses propres tirs !   \e[0m│\n", &nbr[0]);
+				break;
+			case 7:
+				printf("│ [%s] \e[0;32mLase\e[0m             │ \e[3mCette arme produit un rayon laser      \e[0m│\n"
+					   "│  Coût Energie : 4    │ \e[3mtrès puissant mais difficile à orienter\e[0m│\n", &nbr[0]);
+				break;
+			case 8:
+				printf("│ [%s] \e[0;32mCannon XM1      \e[0m │ \e[3mPremier cannon de la gamme XM,         \e[0m│\n"
+					   "│  Coût Energie : 4    │ \e[3mabordable et équilibré                \e[0m│\n", &nbr[0]);
+				break;
 			//id systems + 30
 			case 31:
 				printf("│%s\e[40mGénérateur:\e[0m \e[3mPermet de récupérer ponctuellement de l'énergie\e[0m │\n",&nbr[0]);
@@ -171,86 +185,161 @@
 				printf("│%s\e[40mExtension d'arme 3:\e[0m \e[3mRajoute un emlacement pour une arme\e[0m     │\n",&nbr[0]);
 				break;
 			case 101 :
-			printf("┌───────────────────┐\n"
-				   "│   \e[1;92mCannon à Ions\e[0m   │\n"
-				   "├───────────────────┤\n"
-				   "│      Attaque      │\n" 
-				   "├───────────────────┤\n"
-				   "│   ♦  ○  ○  ○  ○   │\n"
-				   "├───────────────────┤\n"
-				   "│     Precision     │\n"
-				   "├───────────────────┤\n"
-				   "│   ♦  ♦  ♦  ♦  ○   │\n"
-				   "├───────────────────┤\n"
-				   "│   Nombre de Tirs  │\n"
-				   "├───────────────────┤\n"
-				   "│   ♦  ♦  ○  ○  ○   │\n"
-				   "├───────────────────┤\n"
-				   "│ [0] Retour        │\n"
-				   "└───────────────────┘\n");
+				printf("┌───────────────────┐\n"
+					   "│   \e[1;92mCannon à Ions\e[0m   │\n"
+					   "├───────────────────┤\n"
+					   "│      Attaque      │\n" 
+					   "├───────────────────┤\n"
+					   "│   ♦  ○  ○  ○  ○   │\n"
+					   "├───────────────────┤\n"
+					   "│     Precision     │\n"
+					   "├───────────────────┤\n"
+					   "│   ♦  ♦  ♦  ♦  ○   │\n"
+					   "├───────────────────┤\n"
+					   "│   Nombre de Tirs  │\n"
+					   "├───────────────────┤\n"
+					   "│   ♦  ♦  ○  ○  ○   │\n"
+					   "├───────────────────┤\n"
+					   "│ [0] Retour        │\n"
+					   "└───────────────────┘\n");
 				break;
 			case 102 :
-			printf("┌───────────────────┐\n"
-				   "│    \e[1;92mVieux Cannon\e[0m   │\n"
-				   "├───────────────────┤\n"
-				   "│      Attaque      │\n" 
-				   "├───────────────────┤\n"
-				   "│   ♦  ○  ○  ○  ○   │\n"
-				   "├───────────────────┤\n"
-				   "│     Precision     │\n"
-				   "├───────────────────┤\n"
-				   "│   ♦  ♦  ♦  ○  ○   │\n"
-				   "├───────────────────┤\n"
-				   "│   Nombre de Tirs  │\n"
-				   "├───────────────────┤\n"
-				   "│   ♦  ○  ○  ○  ○   │\n"
-				   "├───────────────────┤\n"
-				   "│ [0] Retour        │\n"
-				   "└───────────────────┘\n");
+				printf("┌───────────────────┐\n"
+					   "│    \e[1;92mVieux Cannon\e[0m   │\n"
+					   "├───────────────────┤\n"
+					   "│      Attaque      │\n" 
+					   "├───────────────────┤\n"
+					   "│   ♦  ○  ○  ○  ○   │\n"
+					   "├───────────────────┤\n"
+					   "│     Precision     │\n"
+					   "├───────────────────┤\n"
+					   "│   ♦  ♦  ♦  ○  ○   │\n"
+					   "├───────────────────┤\n"
+					   "│   Nombre de Tirs  │\n"
+					   "├───────────────────┤\n"
+					   "│   ♦  ○  ○  ○  ○   │\n"
+					   "├───────────────────┤\n"
+					   "│ [0] Retour        │\n"
+					   "└───────────────────┘\n");
 				break;
 			case 103 :
-			printf("┌───────────────────┐\n"
-				   "│      \e[1;92mGatling\e[0m      │\n"
-				   "├───────────────────┤\n"
-				   "│      Attaque      │\n" 
-				   "├───────────────────┤\n"
-				   "│   ♦  ○  ○  ○  ○   │\n"
-				   "├───────────────────┤\n"
-				   "│     Precision     │\n"
-				   "├───────────────────┤\n"
-				   "│   ♦  ♦  ♦  ○  ○   │\n"
-				   "├───────────────────┤\n"
-				   "│   Nombre de Tirs  │\n"
-				   "├───────────────────┤\n"
-				   "│   ♦  ♦  ♦  ♦  ♦   │\n"
-				   "├───────────────────┤\n"
-				   "│ [0] Retour        │\n"
-				   "└───────────────────┘\n");
+				printf("┌───────────────────┐\n"
+					   "│      \e[1;92mGatling\e[0m      │\n"
+					   "├───────────────────┤\n"
+					   "│      Attaque      │\n" 
+					   "├───────────────────┤\n"
+					   "│   ♦  ○  ○  ○  ○   │\n"
+					   "├───────────────────┤\n"
+					   "│     Precision     │\n"
+					   "├───────────────────┤\n"
+					   "│   ♦  ♦  ♦  ○  ○   │\n"
+					   "├───────────────────┤\n"
+					   "│   Nombre de Tirs  │\n"
+					   "├───────────────────┤\n"
+					   "│   ♦  ♦  ♦  ♦  ♦   │\n"
+					   "├───────────────────┤\n"
+					   "│ [0] Retour        │\n"
+					   "└───────────────────┘\n");
 				break;
 			case 104 :
-			printf("┌───────────────────┐\n"
-				   "│   \e[1;92mVieux Missile\e[0m   │\n"
-				   "├───────────────────┤\n"
-				   "│      Attaque      │\n" 
-				   "├───────────────────┤\n"
-				   "│   ♦  ○  ○  ○  ○   │\n"
-				   "├───────────────────┤\n"
-				   "│     Precision     │\n"
-				   "├───────────────────┤\n"
-				   "│   ♦  ♦  ♦  ♦  ♦   │\n"
-				   "├───────────────────┤\n"
-				   "│   Nombre de Tirs  │\n"
-				   "├───────────────────┤\n"
-				   "│   ♦  ○  ○  ○  ○   │\n"
-				   "├───────────────────┤\n"
-				   "│ [0] Retour        │\n"
-				   "└───────────────────┘\n");
+				printf("┌───────────────────┐\n"
+					   "│   \e[1;92mVieux Missile\e[0m   │\n"
+					   "├───────────────────┤\n"
+					   "│      Attaque      │\n" 
+					   "├───────────────────┤\n"
+					   "│   ♦  ○  ○  ○  ○   │\n"
+					   "├───────────────────┤\n"
+					   "│     Precision     │\n"
+					   "├───────────────────┤\n"
+					   "│   ♦  ♦  ♦  ♦  ♦   │\n"
+					   "├───────────────────┤\n"
+					   "│   Nombre de Tirs  │\n"
+					   "├───────────────────┤\n"
+					   "│   ♦  ○  ○  ○  ○   │\n"
+					   "├───────────────────┤\n"
+					   "│ [0] Retour        │\n"
+					   "└───────────────────┘\n");
+				break;
+			case 105 :
+				printf("┌───────────────────┐\n"
+					   "│ \e[0;32mCannon à Pulsion\e[0m│\n"
+					   "├───────────────────┤\n"
+					   "│      Attaque      │\n" 
+					   "├───────────────────┤\n"
+					   "│   ♦  ○  ○  ○  ○   │\n"
+					   "├───────────────────┤\n"
+					   "│     Precision     │\n"
+					   "├───────────────────┤\n"
+					   "│   ♦  ♦  ○  ○  ○   │\n"
+					   "├───────────────────┤\n"
+					   "│   Nombre de Tirs  │\n"
+					   "├───────────────────┤\n"
+					   "│   ♦  ♦  ♦  ○  ○   │\n"
+					   "├───────────────────┤\n"
+					   "│ [0] Retour        │\n"
+					   "└───────────────────┘\n");
+				break;
+			case 106 :
+				printf("┌───────────────────┐\n"
+					   "│  \e[0;32mGatling à Proton\e[0m │\n"
+					   "├───────────────────┤\n"
+					   "│      Attaque      │\n" 
+					   "├───────────────────┤\n"
+					   "│   ♦  ♦  ♦  ○  ○   │\n"
+					   "├───────────────────┤\n"
+					   "│     Precision     │\n"
+					   "├───────────────────┤\n"
+					   "│   ♦  ○  ○  ○  ○   │\n"
+					   "├───────────────────┤\n"
+					   "│   Nombre de Tirs  │\n"
+					   "├───────────────────┤\n"
+					   "│   ♦  ♦  ♦  ♦  ♦   │\n"
+					   "├───────────────────┤\n"
+					   "│ [0] Retour        │\n"
+					   "└───────────────────┘\n");
+				break;
+			case 107 :
+				printf("┌───────────────────┐\n"
+					   "│       \e[0;32mLaser\e[0m       │\n"
+					   "├───────────────────┤\n"
+					   "│      Attaque      │\n" 
+					   "├───────────────────┤\n"
+					   "│   ♦  ♦  ♦  ○  ○   │\n"
+					   "├───────────────────┤\n"
+					   "│     Precision     │\n"
+					   "├───────────────────┤\n"
+					   "│   ♦  ♦  ♦  ○  ○   │\n"
+					   "├───────────────────┤\n"
+					   "│   Nombre de Tirs  │\n"
+					   "├───────────────────┤\n"
+					   "│   ♦  ○  ○  ○  ○   │\n"
+					   "├───────────────────┤\n"
+					   "│ [0] Retour        │\n"
+					   "└───────────────────┘\n");
+				break;
+			case 108 :
+				printf("┌───────────────────┐\n"
+					   "│     \e[0;32mCannon XM1\e[0m    │\n"
+					   "├───────────────────┤\n"
+					   "│      Attaque      │\n" 
+					   "├───────────────────┤\n"
+					   "│   ♦  ○  ○  ○  ○   │\n"
+					   "├───────────────────┤\n"
+					   "│     Precision     │\n"
+					   "├───────────────────┤\n"
+					   "│   ♦  ♦  ♦  ♦  ○   │\n"
+					   "├───────────────────┤\n"
+					   "│   Nombre de Tirs  │\n"
+					   "├───────────────────┤\n"
+					   "│   ♦  ♦  ○  ○  ○   │\n"
+					   "├───────────────────┤\n"
+					   "│ [0] Retour        │\n"
+					   "└───────────────────┘\n");
 				break;
 		}
 	}
-
 	//display en couleurs s'il vous plait
-	void display(int index, int sub)	{
+	void display(int index, int sub) {
 		switch(index) {
 			case 1 :
 				//Titre
@@ -291,14 +380,88 @@
 					   "│ ou  que  les \e[1;32mplans\e[0m  ne  tombent  entre  les mains  de grandes │\n"
 					   "│ puissances  qui  en  userait  pour  contrôler l'univers . . . │\n"
 					   "│                                                               │\n"
+					   "├───────────────────────────────────────────────────────────────┤\n"
+					   "│ [0] Suite                                                     │\n"
 					   "└───────────────────────────────────────────────────────────────┘\n");
 				break;
 			//scenario
 			case 2 :
 				switch (sub) {
-					//intro
+					//tuto
 					case 1:
-						//printf();
+						printf("┌───────────────────────────────────────────────────────────────┐\n"
+							   "│                    ---─── TUTORIEL ───---                     │\n"
+							   "├───────────────────────────────────────────────────────────────┤\n"
+							   "│ Choisissez une option à l'aide des numéros :                  │\n"
+							   "│ [1] Gestion des ressources                                    │\n"
+							   "│ [2] Navigation                                                │\n"
+							   "│ [3] Combat                                                    │\n"
+							   "│ [4] Passer                                                    │\n"
+							   "└───────────────────────────────────────────────────────────────┘\n");
+						break;
+					case 2:
+						printf("┌───────────────────────────────────────────────────────────────┐\n"
+							   "│                    ---─── TUTORIEL ───---                     │\n"
+							   "├───────────────────────────────────────────────────────────────┤\n"
+							   "│ Gestion des ressources :                                      │\n"
+							   "│ Vous aurez besoin au cours du jeu de gérer différentes        │\n"
+							   "│ ressources :                                                  │\n"
+							   "│ -le Fuel permettant le mouvement, vous perdez si vous tombez  │\n"
+							   "│  à cours au moment de voyager.                                │\n"
+							   "│ -les Crédits, ils servent à acheter des réparations, armes,   │\n"
+							   "│  améliorations... dans les magasins.                          │\n"
+							   "│ -l'energie, détail dans la branche Combats                    │\n"
+							   "├───────────────────────────────────────────────────────────────┤\n"
+					   		   "│ [0] Retour                                                    │\n"
+					   		   "└───────────────────────────────────────────────────────────────┘\n");
+						break;
+					case 3:
+						printf("┌───────────────────────────────────────────────────────────────┐\n"
+							   "│                    ---─── TUTORIEL ───---                     │\n"
+							   "├───────────────────────────────────────────────────────────────┤\n"
+							   "│ Navigation :                                                  │\n"
+							   "│ Lors de la navigation, vous serez confronté à une carte et    │\n"
+							   "│ vous pourrez choisir la prochaine zone dans laquelle vous     │\n"
+							   "│ évoluerez, les zones déterminent les évènements et rencontres │\n"
+							   "│ ainsi que les conditions de combat.                           │\n"
+							   "│ Pour choisir lequel des deux embranchement vous voulez        │\n"
+							   "│ emprunter sur la carte, il faut entrer 1 ou 2, sachant que 2  │\n"
+							   "│ vous fera toujours emprunter le chemin le plus en bas. S'il   │\n"
+							   "│ n'y a qu'une option, appuyez sur 1.                           │\n"
+							   "├───────────────────────────────────────────────────────────────┤\n"
+					   		   "│ [0] Retour                                                    │\n"
+					   		   "└───────────────────────────────────────────────────────────────┘\n");
+						break;
+					case 4:
+						printf("┌───────────────────────────────────────────────────────────────┐\n"
+							   "│                    ---─── TUTORIEL ───---                     │\n"
+							   "├───────────────────────────────────────────────────────────────┤\n"
+							   "│ Combat :                                                      │\n"
+							   "│ Lors des phases de combats, vous affrontez un seul adversaire │\n"
+							   "│ avec les armes que vous avez récupérer au cours de l'aventure │\n"
+							   "│ Vous et votre adversaire possédez deux jauges, une jauge de   │\n"
+							   "│ bouclier, régénérée au maximum au début du combat, et une     │\n"
+							   "│ jauge de vie qu'il faudra entretenir tout au long du périple. │\n"
+							   "│ Vous pourez néanmoins réparer votre vie dans des magasins ou  │\n"
+							   "│ évênements particuliers.                                      │\n"
+							   "│ - Le combat se déroule au tour par tour et vous choisissez de │\n"
+							   "│ la fin de votre tour. A la fin de chaque tour, en fonction    │\n"
+							   "│ des statistique, chacun régénère une portion de son bouclier  │\n"
+							   "│ ainsi que de son energie. L'energie sert à utiliser ses armes │\n"
+							   "│ lorsque vous n'avez plus d'energie, vous devez attendre la    │\n"
+							   "│ fin du tour pour qu'elle se régénère.                         │\n"
+							   "│ - L'utilisation des armes est limitée par votre energie mais  │\n"
+							   "│ si vous avez plusieurs armes, rien ne vous empêche de toute   │\n"
+							   "│ les utiliser.                                                 │\n"
+							   "│ - Les armes possèdent leurs statistiques propres, l'attaque,  │\n"
+							   "│ le nombre de tirs, la précision. L'attaque indique les dégats │\n"
+							   "│ infligés par un tir, le nombre de tir indique ce qu'il dit et │\n"
+							   "│ la précision indique la probabilité que le tir touche l'autre │\n"
+							   "│ Cependant, ce n'est pas le seul facteur qui entre en jeu...   │\n"
+							   "│ Le niveau de votre équipage peut influencer sur ces facteurs. │\n"
+							   "├───────────────────────────────────────────────────────────────┤\n"
+					   		   "│ [0] Retour                                                    │\n"
+					   		   "└───────────────────────────────────────────────────────────────┘\n");
 						break;
 				}
 				break;
@@ -431,7 +594,9 @@
 							   "├───────────────────────────────────────────────────────────────┤\n"
 							   "│ [3] Fuel x 2 ------------------------------------------- 20 § │\n"
 							   "├───────────────────────────────────────────────────────────────┤\n"
-							   "│ [4] Quitter                                                   │\n"
+							   "│ [4] Réparation (20 points) ----------------------------- 50 § │\n"
+							   "├───────────────────────────────────────────────────────────────┤\n"
+							   "│ [5] Quitter                                                   │\n"
 							   "└───────────────────────────────────────────────────────────────┘\n");
 						break;
 					case 2:
@@ -459,75 +624,75 @@
 				switch (sub){
 					case 1:
 						printf("├───────────────────────────────────────────────────────────────┤\n"
-       						   "│·      ·   \e[0;103m░\e[0m  \e[0;103m░░▒▒▓▒█▓▓█▓▓█▓█████▓███▓██▓██▒▓▓░▒░░\e[0m  \e[0;103m▒\e[0m ·     ·  │\n"
-       						   "│   ·         \e[0;103m░\e[0m \e[0;103m▒░▒░▓▒▓▒▓▓█▓▓██▓████▓███▓██▒▓▒░▒░▒ \e[0;103m▒\e[0m ·    ·     │\n"
-       						   "│·     ·          \e[0;103m░░▒░▒▓▒▒▓▓█▒▓██▓▓█▓▓█▓▒▓▒░▒░▒░\e[0m         ·    · │\n"
-       						   "│       ·         \e[0;103m░\e[0m   \e[0;103m░░▒░▒░▒▓▒▓█▒▓▒█▓▒▓▒█▓▒▓▒░░\e[0m \e[0;103m░\e[0m \e[0;103m░\e[0m   ·        │\n"
-       						   "│   ·       ·       \e[0;103m▒\e[0m  \e[0;103m░░▒▒░▒░▒░▒▒░▒▓▒░▒▒░░\e[0m             ·    ·  │\n"
-       						   "│       ·       ·     \e[0;103m░\e[0m   \e[0;103m▒▒░▒░░▒░▒░░▒░░░\e[0m   \e[0;103m▒\e[0m      ·      ·     │\n"
-       						   "│   ·       ·    ▄▄▄·       \e[0;103m░\e[0m  \e[0;103m░\e[0m             ·          ·     · │\n"
-       						   "│       ·      ▀▀█\e[%sm▒░\e[0m█▀                    ·    ▄█\e[%sm░░\e[0m█▄        ·  │\n"
-       						   "│·    ·     ·   · █\e[%sm▒░\e[0m█▀  ·     ·      ▄▄█████▄█\e[%sm░\e[0m█▀▀█\e[%sm░\e[0m█▄\e[%sm▓▓▓\e[0m■ ·   │\n"
-       						   "│   ·     ·  ·  ███\e[%sm▓▒░\e[0m█         ·  ·   · ▀■█▀█■▀■▄▄■▀▀█▄▄  ·    │\n"
-       						   "│       ■■■■█████\e[%sm▓▓▒▒▒░\e[0m█   ·  ·      ·   ▄■█▄█■▄■▀▀■▄▄█▀▀·     ·│\n"
-       						   "│·    ·  ·      ███\e[%sm▓▒░\e[0m█        ·    · ▀▀█████▀█\e[%sm░\e[0m█▄▄█\e[%sm░\e[0m█▀\e[%sm▓▓▓\e[0m■  ·  │\n"
-       						   "│   ·   ·   ·     █\e[%sm▒░\e[0m█▄    ·      ·     ·    · ▀█\e[%sm░░\e[0m█▀        ·  │\n"
-       						   "│     ·    ·   ▄▄█\e[%sm▒░\e[0m█▄   ·    ·    ·     ·   ·       ·      ·   │\n"
-       						   "│·  ·   ·    ·   ▀▀▀·      ·      ·     ·    ·    ·       ·     │\n",&atlanta.color[0],&ennemis[0].color[0],&atlanta.color[0],&ennemis[0].color[0],&ennemis[0].color[0],&ennemis[0].color[0],&atlanta.color[0],&atlanta.color[0],&atlanta.color[0],&ennemis[0].color[0],&ennemis[0].color[0],&ennemis[0].color[0],&atlanta.color[0],&ennemis[0].color[0],&atlanta.color[0]);
+							   "│·      ·   \e[0;103m░\e[0m  \e[0;103m░░▒▒▓▒█▓▓█▓▓█▓█████▓███▓██▓██▒▓▓░▒░░\e[0m  \e[0;103m▒\e[0m ·     ·  │\n"
+							   "│   ·         \e[0;103m░\e[0m \e[0;103m▒░▒░▓▒▓▒▓▓█▓▓██▓████▓███▓██▒▓▒░▒░▒ \e[0;103m▒\e[0m ·    ·     │\n"
+							   "│·     ·          \e[0;103m░░▒░▒▓▒▒▓▓█▒▓██▓▓█▓▓█▓▒▓▒░▒░▒░\e[0m         ·    · │\n"
+							   "│       ·         \e[0;103m░\e[0m   \e[0;103m░░▒░▒░▒▓▒▓█▒▓▒█▓▒▓▒█▓▒▓▒░░\e[0m \e[0;103m░\e[0m \e[0;103m░\e[0m   ·        │\n"
+							   "│   ·       ·       \e[0;103m▒\e[0m  \e[0;103m░░▒▒░▒░▒░▒▒░▒▓▒░▒▒░░\e[0m             ·    ·  │\n"
+							   "│       ·       ·     \e[0;103m░\e[0m   \e[0;103m▒▒░▒░░▒░▒░░▒░░░\e[0m   \e[0;103m▒\e[0m      ·      ·     │\n"
+							   "│   ·       ·    ▄▄▄·       \e[0;103m░\e[0m  \e[0;103m░\e[0m             ·          ·     · │\n"
+							   "│       ·      ▀▀█\e[%sm▒░\e[0m█▀                    ·    ▄█\e[%sm░░\e[0m█▄        ·  │\n"
+							   "│·    ·     ·   · █\e[%sm▒░\e[0m█▀  ·     ·      ▄▄█████▄█\e[%sm░\e[0m█▀▀█\e[%sm░\e[0m█▄\e[%sm▓▓▓\e[0m■ ·   │\n"
+							   "│   ·     ·  ·  ███\e[%sm▓▒░\e[0m█         ·  ·   · ▀■█▀█■▀■▄▄■▀▀█▄▄  ·    │\n"
+							   "│       ■■■■█████\e[%sm▓▓▒▒▒░\e[0m█   ·  ·      ·   ▄■█▄█■▄■▀▀■▄▄█▀▀·     ·│\n"
+							   "│·    ·  ·      ███\e[%sm▓▒░\e[0m█        ·    · ▀▀█████▀█\e[%sm░\e[0m█▄▄█\e[%sm░\e[0m█▀\e[%sm▓▓▓\e[0m■  ·  │\n"
+							   "│   ·   ·   ·     █\e[%sm▒░\e[0m█▄    ·      ·     ·    · ▀█\e[%sm░░\e[0m█▀        ·  │\n"
+							   "│     ·    ·   ▄▄█\e[%sm▒░\e[0m█▄   ·    ·    ·     ·   ·       ·      ·   │\n"
+							   "│·  ·   ·    ·   ▀▀▀·      ·      ·     ·    ·    ·       ·     │\n",&atlanta.color[0],&sclr[0],&atlanta.color[0],&sclr[0],&sclr[0],&sclr[0],&atlanta.color[0],&atlanta.color[0],&atlanta.color[0],&sclr[0],&sclr[0],&sclr[0],&atlanta.color[0],&sclr[0],&atlanta.color[0]);
 						break;
 					case 2:
 						printf("├───────────────────────────────────────────────────────────────┤\n"
-    						   "│·      ·         ·       ·       ·        ·     ·        ·     │\n"
-    						   "│   ·      \e[%sm▄█▒▓▓▄\e[0m    \e[%sm■\e[0m            ·    ·       ·      ·         │\n"
-    						   "│·     \e[%sm■\e[0m  \e[%sm▓▒░▒░▓▒█\e[0m        ·               ·     ·      ·      · │\n"
-    						   "│       · \e[%sm█░▒█▒▒░▓\e[0m       ·       ·     ·         ·       ·      │\n"
-    						   "│   ·  \e[%sm■\e[0m   \e[%sm▀▓░▒█▀\e[0m  ·        ·       ·       ·        ·      ·   │\n"
-    						   "│       ·       ·      ·       ·   ·      ·   ·     ·      ·    │\n"
-    						   "│   ·       ·    ▄▄▄·            ·    ·          ·      ·     · │\n"
-    						   "│       ·      ▀▀█\e[%sm▒░\e[0m█▀       ·   ·     ·    ·   ▄█\e[%sm░░\e[0m█▄        · │\n"
-    						   "│·    ·     ·   · █\e[%sm▒░\e[0m█▀  ·    ·        ▄▄█████▄█\e[%sm░\e[0m█▀▀█\e[%sm░\e[0m█▄\e[%sm▓▓▓\e[0m■ ·  │\n"
-    						   "│   ·     ·  ·  ███\e[%sm▓▒░\e[0m█         ·   ·   · ▀■█▀█■▀■▄▄■▀▀█▄▄  ·   │\n"
-    						   "│       ■■■■█████\e[%sm▓▓▒▒▒░\e[0m█   ·     ·        ▄■█▄█■▄■▀▀■▄▄█▀▀·    ·│\n"
-    						   "│·    ·  ·      ███\e[%sm▓▒░\e[0m█        ·     · ▀▀█████▀█\e[%sm░\e[0m█▄▄█\e[%sm░\e[0m█▀\e[%sm▓▓▓\e[0m■ ·  │\n"
-    						   "│   ·   ·   ·     █\e[%sm▒░\e[0m█▄    ·      ·      ·      ▀█\e[%sm░░\e[0m█▀  ·     · │\n"
-    						   "│     ·    ·   ▄▄█\e[%sm▒░\e[0m█▄   ·   ·     ·     ·   ·       ·     ·    │\n"
-    						   "│·  ·   ·    ·   ▀▀▀·      ·      ·      ·   ·    ·       ·     │\n",&clr[0],&clr[0],&clr[0],&clr[0],&clr[0],&clr[0],&clr[0],&atlanta.color[0],&ennemis[0].color[0],&atlanta.color[0],&ennemis[0].color[0],&ennemis[0].color[0],&ennemis[0].color[0],&atlanta.color[0],&atlanta.color[0],&atlanta.color[0],&ennemis[0].color[0],&ennemis[0].color[0],&ennemis[0].color[0],&atlanta.color[0],&ennemis[0].color[0],&atlanta.color[0]);
+							   "│·      ·         ·       ·       ·        ·     ·        ·     │\n"
+							   "│   ·      \e[%sm▄█▒▓▓▄\e[0m    \e[%sm■\e[0m            ·    ·       ·      ·         │\n"
+							   "│·     \e[%sm■\e[0m  \e[%sm▓▒░▒░▓▒█\e[0m        ·               ·     ·      ·      · │\n"
+							   "│       · \e[%sm█░▒█▒▒░▓\e[0m       ·       ·     ·         ·       ·      │\n"
+							   "│   ·  \e[%sm■\e[0m   \e[%sm▀▓░▒█▀\e[0m  ·        ·       ·       ·        ·      ·   │\n"
+							   "│       ·       ·      ·       ·   ·      ·   ·     ·      ·    │\n"
+							   "│   ·       ·    ▄▄▄·            ·    ·          ·      ·     · │\n"
+							   "│       ·      ▀▀█\e[%sm▒░\e[0m█▀       ·   ·     ·    ·   ▄█\e[%sm░░\e[0m█▄        · │\n"
+							   "│·    ·     ·   · █\e[%sm▒░\e[0m█▀  ·    ·        ▄▄█████▄█\e[%sm░\e[0m█▀▀█\e[%sm░\e[0m█▄\e[%sm▓▓▓\e[0m■ ·  │\n"
+							   "│   ·     ·  ·  ███\e[%sm▓▒░\e[0m█         ·   ·   · ▀■█▀█■▀■▄▄■▀▀█▄▄  ·   │\n"
+							   "│       ■■■■█████\e[%sm▓▓▒▒▒░\e[0m█   ·     ·        ▄■█▄█■▄■▀▀■▄▄█▀▀·    ·│\n"
+							   "│·    ·  ·      ███\e[%sm▓▒░\e[0m█        ·     · ▀▀█████▀█\e[%sm░\e[0m█▄▄█\e[%sm░\e[0m█▀\e[%sm▓▓▓\e[0m■ ·  │\n"
+							   "│   ·   ·   ·     █\e[%sm▒░\e[0m█▄    ·      ·      ·      ▀█\e[%sm░░\e[0m█▀  ·     · │\n"
+							   "│     ·    ·   ▄▄█\e[%sm▒░\e[0m█▄   ·   ·     ·     ·   ·       ·     ·    │\n"
+							   "│·  ·   ·    ·   ▀▀▀·      ·      ·      ·   ·    ·       ·     │\n",&clr[0],&clr[0],&clr[0],&clr[0],&clr[0],&clr[0],&clr[0],&atlanta.color[0],&sclr[0],&atlanta.color[0],&sclr[0],&sclr[0],&sclr[0],&atlanta.color[0],&atlanta.color[0],&atlanta.color[0],&sclr[0],&sclr[0],&sclr[0],&atlanta.color[0],&sclr[0],&atlanta.color[0]);
 						break;
 					case 3:
 						printf("├───────────────────────────────────────────────────────────────┤\n"
-    						   "│·      ·   ·     ·   ·   ·       ·        ·     ·        ·     │\n"
-    						   "│   ·          ·    \e[1;90m■\e[0m          ·    ·       ·      ·\e[1;90m▀■\e[0m          │\n"
-    						   "│·  \e[1;90m■\e[0m  ·     ·      ·     ·   \e[1;90m■▀\e[0m          ·     ·      ·      · │\n"
-    						   "│       ·\e[1;90m▄██\e[0m    ·      ·       ·     ·          ·      ·\e[1;90m███\e[0m     │\n"
-    						   "│   ·    \e[1;90m▀▀\e[0m   ·  \e[1;90m■\e[0m   ·        ·       ·   \e[1;90m██▄\e[0m ·        · \e[1;90m███\e[0m  · │\n"
-    						   "│       ·       ·      ·       ·   ·    \e[1;90m ▀▀\e[0m   ·     ·      ·    │\n"
-    						   "│   ·       ·    ▄▄▄·            ·      ·        ·      ·     · │\n"
-    						   "│       ·      ▀▀█\e[%sm▒░\e[0m█▀      · \e[1;90m██\e[0m     ·     ·   ▄█\e[%sm░░\e[0m█▄       ·   │\n"
-    						   "│·    ·     ·   · █\e[%sm▒░\e[0m█▀  ·     ·      ▄▄█████▄█\e[%sm░\e[0m█▀▀█\e[%sm░\e[0m█▄\e[%sm▓▓▓\e[0m■ ·   │\n"
-    						   "│   ·     ·  ·  ███\e[%sm▓▒░\e[0m█          · ·   · ▀■█▀█■▀■▄▄■▀▀█▄▄   ·   │\n"
-    						   "│       ■■■■█████\e[%sm▓▓▒▒▒░\e[0m█   ·    ·        ▄■█▄█■▄■▀▀■▄▄█▀▀·     ·│\n"
-    						   "│·  \e[1;90m██\e[0m·  ·     ███\e[%sm▓▒░\e[0m█\e[0m      ·       · ▀▀█████▀█\e[%sm░\e[0m█▄▄█\e[%sm░\e[0m█▀\e[%sm▓▓▓\e[0m■  ·  │\n"
-    						   "│   ·   ·   ·     █\e[%sm▒░\e[0m█▄    ·   \e[1;90m■\e[0m     ·   ·   · ▀█\e[%sm░░\e[0m█▀           │\n"
-    						   "│     ·    ·   ▄▄█\e[%sm▒░\e[0m█▄   ·   ·     \e[1;90m██\e[0m·      ·   ·       ·    \e[1;90m■\e[0m  │\n"
-    						   "│·  ·   ·    ·   ▀▀▀·      ·      ·  \e[1;90m▀\e[0m   ·   ·    ·       ·     │\n",&atlanta.color[0],&ennemis[0].color[0],&atlanta.color[0],&ennemis[0].color[0],&ennemis[0].color[0],&ennemis[0].color[0],&atlanta.color[0],&atlanta.color[0],&atlanta.color[0],&ennemis[0].color[0],&ennemis[0].color[0],&ennemis[0].color[0],&atlanta.color[0],&ennemis[0].color[0],&atlanta.color[0]);
+							   "│·      ·   ·     ·   ·   ·       ·        ·     ·        ·     │\n"
+							   "│   ·          ·    \e[1;90m■\e[0m          ·    ·       ·      ·\e[1;90m▀■\e[0m          │\n"
+							   "│·  \e[1;90m■\e[0m  ·     ·      ·     ·   \e[1;90m■▀\e[0m          ·     ·      ·      · │\n"
+							   "│       ·\e[1;90m▄██\e[0m    ·      ·       ·     ·          ·      ·\e[1;90m███\e[0m     │\n"
+							   "│   ·    \e[1;90m▀▀\e[0m   ·  \e[1;90m■\e[0m   ·        ·       ·   \e[1;90m██▄\e[0m ·        · \e[1;90m███\e[0m  · │\n"
+							   "│       ·       ·      ·       ·   ·    \e[1;90m ▀▀\e[0m   ·     ·      ·    │\n"
+							   "│   ·       ·    ▄▄▄·            ·      ·        ·      ·     · │\n"
+							   "│       ·      ▀▀█\e[%sm▒░\e[0m█▀      · \e[1;90m██\e[0m     ·     ·   ▄█\e[%sm░░\e[0m█▄       ·   │\n"
+							   "│·    ·     ·   · █\e[%sm▒░\e[0m█▀  ·     ·      ▄▄█████▄█\e[%sm░\e[0m█▀▀█\e[%sm░\e[0m█▄\e[%sm▓▓▓\e[0m■ ·   │\n"
+							   "│   ·     ·  ·  ███\e[%sm▓▒░\e[0m█          · ·   · ▀■█▀█■▀■▄▄■▀▀█▄▄   ·   │\n"
+							   "│       ■■■■█████\e[%sm▓▓▒▒▒░\e[0m█   ·    ·        ▄■█▄█■▄■▀▀■▄▄█▀▀·     ·│\n"
+							   "│·  \e[1;90m██\e[0m·  ·     ███\e[%sm▓▒░\e[0m█\e[0m      ·       · ▀▀█████▀█\e[%sm░\e[0m█▄▄█\e[%sm░\e[0m█▀\e[%sm▓▓▓\e[0m■  ·  │\n"
+							   "│   ·   ·   ·     █\e[%sm▒░\e[0m█▄    ·   \e[1;90m■\e[0m     ·   ·   · ▀█\e[%sm░░\e[0m█▀           │\n"
+							   "│     ·    ·   ▄▄█\e[%sm▒░\e[0m█▄   ·   ·     \e[1;90m██\e[0m·      ·   ·       ·    \e[1;90m■\e[0m  │\n"
+							   "│·  ·   ·    ·   ▀▀▀·      ·      ·  \e[1;90m▀\e[0m   ·   ·    ·       ·     │\n",&atlanta.color[0],&sclr[0],&atlanta.color[0],&sclr[0],&sclr[0],&sclr[0],&atlanta.color[0],&atlanta.color[0],&atlanta.color[0],&sclr[0],&sclr[0],&sclr[0],&atlanta.color[0],&sclr[0],&atlanta.color[0]);
 						break;
 					case 4:
 						printf("├───────────────────────────────────────────────────────────────┤\n"
-    						   "│·      ·   ·     ·   ·   ·       ·        ·     ·        ·     │\n"
-    						   "│   ·          ·                ·    ·       ·      ·           │\n"
-    						   "│·     ·     ·      ·     ·               ·     ·      ·      · │\n"
-    						   "│       ·      ·        ·       ·     ·          ·       ·      │\n"
-    						   "│   ·       ·      ·        ·       ·     ·   ·      ·      ·   │\n"
-    						   "│       ·       ·      ·       ·   ·       ·      · ·      ·    │\n"
-    						   "│   ·       ·    ▄▄▄·            ·    ·                ·     ·  │\n"
-    						   "│       ·      ▀▀█\e[%sm▒░\e[0m█▀         ·     ·     ·   ▄█\e[%sm░░\e[0m█▄       ·   │\n"
-    						   "│·    ·     ·   · █\e[%sm▒░\e[0m█▀  ·   ·        ▄▄█████▄█\e[%sm░\e[0m█▀▀█\e[%sm░\e[0m█▄\e[%sm▓▓▓\e[0m■   · │\n"
-    						   "│   ·     ·  ·  ███\e[%sm▓▒░\e[0m█        ·   ·   · ▀■█▀█■▀■▄▄■▀▀█▄▄      ·│\n"
-    						   "│       ■■■■█████\e[%sm▓▓▒▒▒░\e[0m█   ·     ·       ▄■█▄█■▄■▀▀■▄▄█▀▀·      │\n"
-    						   "│·    ·  ·      ███\e[%sm▓▒░\e[0m█         ·   · ▀▀█████▀█\e[%sm░\e[0m█▄▄█\e[%sm░\e[0m█▀\e[%sm▓▓▓\e[0m■  ·  │\n"
-    						   "│   ·   ·   ·     █\e[%sm▒░\e[0m█▄    ·       ·       ·   ▀█\e[%sm░░\e[0m█▀           │\n"
-    						   "│     ·    ·   ▄▄█\e[%sm▒░\e[0m█▄   ·   ·       ·   ·   ·       ·     ·    │\n"
-    						   "│·  ·   ·    ·   ▀▀▀·      ·      ·      ·   ·    ·       ·     │\n",&atlanta.color[0],&ennemis[0].color[0],&atlanta.color[0],&ennemis[0].color[0],&ennemis[0].color[0],&ennemis[0].color[0],&atlanta.color[0],&atlanta.color[0],&atlanta.color[0],&ennemis[0].color[0],&ennemis[0].color[0],&ennemis[0].color[0],&atlanta.color[0],&ennemis[0].color[0],&atlanta.color[0]);
+							   "│·      ·   ·     ·   ·   ·       ·        ·     ·        ·     │\n"
+							   "│   ·          ·                ·    ·       ·      ·           │\n"
+							   "│·     ·     ·      ·     ·               ·     ·      ·      · │\n"
+							   "│       ·      ·        ·       ·     ·          ·       ·      │\n"
+							   "│   ·       ·      ·        ·       ·     ·   ·      ·      ·   │\n"
+							   "│       ·       ·      ·       ·   ·       ·      · ·      ·    │\n"
+							   "│   ·       ·    ▄▄▄·            ·    ·                ·     ·  │\n"
+							   "│       ·      ▀▀█\e[%sm▒░\e[0m█▀         ·     ·     ·   ▄█\e[%sm░░\e[0m█▄       ·   │\n"
+							   "│·    ·     ·   · █\e[%sm▒░\e[0m█▀  ·   ·        ▄▄█████▄█\e[%sm░\e[0m█▀▀█\e[%sm░\e[0m█▄\e[%sm▓▓▓\e[0m■   · │\n"
+							   "│   ·     ·  ·  ███\e[%sm▓▒░\e[0m█        ·   ·   · ▀■█▀█■▀■▄▄■▀▀█▄▄      ·│\n"
+							   "│       ■■■■█████\e[%sm▓▓▒▒▒░\e[0m█   ·     ·       ▄■█▄█■▄■▀▀■▄▄█▀▀·      │\n"
+							   "│·    ·  ·      ███\e[%sm▓▒░\e[0m█         ·   · ▀▀█████▀█\e[%sm░\e[0m█▄▄█\e[%sm░\e[0m█▀\e[%sm▓▓▓\e[0m■  ·  │\n"
+							   "│   ·   ·   ·     █\e[%sm▒░\e[0m█▄    ·       ·       ·   ▀█\e[%sm░░\e[0m█▀           │\n"
+							   "│     ·    ·   ▄▄█\e[%sm▒░\e[0m█▄   ·   ·       ·   ·   ·       ·     ·    │\n"
+							   "│·  ·   ·    ·   ▀▀▀·      ·      ·      ·   ·    ·       ·     │\n",&atlanta.color[0],&sclr[0],&atlanta.color[0],&sclr[0],&sclr[0],&sclr[0],&atlanta.color[0],&atlanta.color[0],&atlanta.color[0],&sclr[0],&sclr[0],&sclr[0],&atlanta.color[0],&sclr[0],&atlanta.color[0]);
 						break;
 				}
 				break;
@@ -663,15 +828,15 @@
 		switch (w->route){
 			case 1:	
 				printf("│·······························································│\n"
-			   		   "│····················┌── %s ──── %s ──┐·····┌── %s ─┐··············│\n"
-			   		   "│······┌── %s ──── %s ─┴── %s ─┐·······├─ %s ─┴── %s ─┴── %s ──┐······│\n"
-			   		   "│·· %s ─┴── %s ──── %s ──── %s ─┴── %s ─┬┘·····┌── %s ─┐·······├─ %s ··│\n"
-			   		   "│··································└── %s ─┴── %s ─┴── %s ──┘······│\n"
-			   		   "│·······························································│\n",
-			   			milieuPrint[5],milieuPrint[8],milieuPrint[12],milieuPrint[1],milieuPrint[3],
-			   			milieuPrint[6],milieuPrint[10],milieuPrint[13],milieuPrint[16],milieuPrint[0],
-			   			milieuPrint[2],milieuPrint[4],milieuPrint[7],milieuPrint[9],milieuPrint[14],
-			   			milieuPrint[18],milieuPrint[11],milieuPrint[15],milieuPrint[17]);
+					   "│····················┌── %s ──── %s ──┐·····┌── %s ─┐··············│\n"
+					   "│······┌── %s ──── %s ─┴── %s ─┐·······├─ %s ─┴── %s ─┴── %s ──┐······│\n"
+					   "│·· %s ─┴── %s ──── %s ──── %s ─┴── %s ─┬┘·····┌── %s ─┐·······├─ %s ··│\n"
+					   "│··································└── %s ─┴── %s ─┴── %s ──┘······│\n"
+					   "│·······························································│\n",
+						milieuPrint[5],milieuPrint[8],milieuPrint[12],milieuPrint[1],milieuPrint[3],
+						milieuPrint[6],milieuPrint[10],milieuPrint[13],milieuPrint[16],milieuPrint[0],
+						milieuPrint[2],milieuPrint[4],milieuPrint[7],milieuPrint[9],milieuPrint[14],
+						milieuPrint[18],milieuPrint[11],milieuPrint[15],milieuPrint[17]);
 				break;
 			case 2:
 				printf("│·······························································│\n"
@@ -681,23 +846,23 @@
 					   "│·············└── %s ─┬── %s ──┴─ %s ──┬─ %s ──┘····················│\n"
 					   "│····················└── %s ──── %s ──┘···························│\n",
 					   milieuPrint[6],milieuPrint[10],milieuPrint[14],milieuPrint[17],milieuPrint[20],
-			   		   milieuPrint[1],milieuPrint[3],milieuPrint[11],milieuPrint[18],milieuPrint[21],
-			   		   milieuPrint[23],milieuPrint[0],milieuPrint[2],milieuPrint[4],milieuPrint[7],
-			   		   milieuPrint[15],milieuPrint[19],milieuPrint[22],milieuPrint[5],milieuPrint[8],
-			   		   milieuPrint[12],milieuPrint[16],milieuPrint[9],milieuPrint[13]);
+					   milieuPrint[1],milieuPrint[3],milieuPrint[11],milieuPrint[18],milieuPrint[21],
+					   milieuPrint[23],milieuPrint[0],milieuPrint[2],milieuPrint[4],milieuPrint[7],
+					   milieuPrint[15],milieuPrint[19],milieuPrint[22],milieuPrint[5],milieuPrint[8],
+					   milieuPrint[12],milieuPrint[16],milieuPrint[9],milieuPrint[13]);
 				break;
 			case 3:
 				printf("│··································┌── %s ──── %s ──── %s ──┐······│\n"
-			   		   "│·············┌── %s ──┐·····┌── %s ─┴┐····················├─ %s ··│\n"
-			   		   "│······┌── %s ─┴┬─ %s ─┬┴─ %s ─┴── %s ──┴─ %s ──┐·····┌── %s ──┤······│\n"
-			   		   "│·· %s ─┴── %s ─┬┘·····└── %s ──── %s ─┐·······├─ %s ─┴┬─ %s ──┘······│\n"
-			   		   "│·············└── %s ─┬── %s ──┐·····├── %s ──┘······│·············│\n"
-			   		   "│····················└── %s ──┴─ %s ─┴── %s ──── %s ──┘·············│\n",
-			   		   milieuPrint[14],milieuPrint[18],milieuPrint[21],milieuPrint[3],milieuPrint[10],
-			   		   milieuPrint[24],milieuPrint[1],milieuPrint[4],milieuPrint[6],milieuPrint[11],
-			   		   milieuPrint[15],milieuPrint[22],milieuPrint[0],milieuPrint[2],milieuPrint[7],
-			   		   milieuPrint[12],milieuPrint[19],milieuPrint[23],milieuPrint[5],milieuPrint[8],
-			   		   milieuPrint[16],milieuPrint[9],milieuPrint[13],milieuPrint[17],milieuPrint[20]);
+					   "│·············┌── %s ──┐·····┌── %s ─┴┐····················├─ %s ··│\n"
+					   "│······┌── %s ─┴┬─ %s ─┬┴─ %s ─┴── %s ──┴─ %s ──┐·····┌── %s ──┤······│\n"
+					   "│·· %s ─┴── %s ─┬┘·····└── %s ──── %s ─┐·······├─ %s ─┴┬─ %s ──┘······│\n"
+					   "│·············└── %s ─┬── %s ──┐·····├── %s ──┘······│·············│\n"
+					   "│····················└── %s ──┴─ %s ─┴── %s ──── %s ──┘·············│\n",
+					   milieuPrint[14],milieuPrint[18],milieuPrint[21],milieuPrint[3],milieuPrint[10],
+					   milieuPrint[24],milieuPrint[1],milieuPrint[4],milieuPrint[6],milieuPrint[11],
+					   milieuPrint[15],milieuPrint[22],milieuPrint[0],milieuPrint[2],milieuPrint[7],
+					   milieuPrint[12],milieuPrint[19],milieuPrint[23],milieuPrint[5],milieuPrint[8],
+					   milieuPrint[16],milieuPrint[9],milieuPrint[13],milieuPrint[17],milieuPrint[20]);
 				break;
 			case 4:
 				printf("│·······························································│\n"
@@ -707,8 +872,8 @@
 					   "│····················└── %s ──┘··································│\n"
 					   "│·······························································│\n",
 					   milieuPrint[7],milieuPrint[10],milieuPrint[2],milieuPrint[4],milieuPrint[8],
-			   		   milieuPrint[11],milieuPrint[12],milieuPrint[13],milieuPrint[15],milieuPrint[0],
-			   		   milieuPrint[1],milieuPrint[3],milieuPrint[5],milieuPrint[9],milieuPrint[14],milieuPrint[6]);
+					   milieuPrint[11],milieuPrint[12],milieuPrint[13],milieuPrint[15],milieuPrint[0],
+					   milieuPrint[1],milieuPrint[3],milieuPrint[5],milieuPrint[9],milieuPrint[14],milieuPrint[6]);
 				break;
 			/*case 5:
 				printf("\n"
@@ -757,7 +922,7 @@
 		}
 		printf("│\n├");
 		for (int i = 0; i<space - 1; i++){
-	  		printf("─");
+			printf("─");
 		}
 		printf("┴");
 		for (int i = 0; i<length - 2; i++){
@@ -765,11 +930,11 @@
 		}
 		printf("┴");
 		for (int i = 0; i<65 - space - length - 1; i++){
-	   		printf("─");
-	 	}
-	 	printf("┤\n");
-	 	int nbr = (57 * v->shield)/v->maxShield;
-	 	printf("│   ");
+			printf("─");
+		}
+		printf("┤\n");
+		int nbr = (57 * v->shield)/v->maxShield;
+		printf("│   ");
 		for (int i = 0; i < nbr; i++){
 			printf("\e[0;94m▄");
 		}
@@ -794,7 +959,7 @@
 		printf("   │\n");
 	}
 
-	void drops(ennemyId, etape){
+	void drops(int ennemyId, int etape){
 		int test = 1;
 		system("clear");
 		displayAtlanta();
@@ -858,7 +1023,7 @@
 			scanf("%d",&test);
 		}
 	}
-//int id;	char nom[30];	int atk;	int nbr_fire;	int accuracy;	int price;	char priceChar[5];
+	//int id;	char nom[30];	int atk;	int nbr_fire;	int accuracy;	int price;	char priceChar[5];
 	void attaque(int wpId, int etape, int cible, int ennemyId, int esquive){
 		system("clear");
 		displayAtlanta();
@@ -869,7 +1034,7 @@
 		for (int i = 0; i < armes[wpId].nbr_fire; i++){
 			int r = random_nbr(0, 100);
 			if (cible != -1){
-				if (r <= (armes[wpId].accuracy + victor.value - ennemis[ennemyId].speed)){
+				if (r <= (armes[wpId].accuracy + victor.value)){
 					ennemis[ennemyId].shield -= armes[wpId].atk;
 					if (ennemis[ennemyId].shield < 0){
 						ennemis[ennemyId].hull += ennemis[ennemyId].shield;
@@ -880,7 +1045,7 @@
 					printf("│ \e[0;91m* Le tir à raté !\e[0m                                             │\n");
 				}
 			}else{
-				if (r <= (armes[wpId].accuracy - atlanta.speed - esquive)){
+				if (r <= (armes[wpId].accuracy - qtal.value - esquive)){
 					atlanta.shield -= armes[wpId].atk;
 					if (atlanta.shield < 0){
 						atlanta.hull += atlanta.shield;
@@ -902,11 +1067,13 @@
 	}
 
 	void combat(int ennemyId, int etape){
+		strcpy(sclr,ennemis[ennemyId].color);
 		int tour = 1;
 		int choix = 0;
 		int choix1 = 0;
 		int test = 0;
 		int dodge = 0;
+		int shieldUse = 0;
 		ennemis[ennemyId].hull = ennemis[ennemyId].maxHull;
 		ennemis[ennemyId].shield = ennemis[ennemyId].maxShield;
 		ennemis[ennemyId].energy = ennemis[ennemyId].maxEnergy/2;
@@ -915,13 +1082,17 @@
 			choix = 0;
 			tour = 1;
 			if (armes[atlanta.weapon1].used == 1){
-			 	armes[atlanta.weapon1].used = 0;
+				armes[atlanta.weapon1].used = 0;
 			}
 			if (armes[atlanta.weapon2].used == 1){
-			 	armes[atlanta.weapon2].used = 0;
+				armes[atlanta.weapon2].used = 0;
 			}
 			if (armes[atlanta.weapon3].used == 1){
 				armes[atlanta.weapon3].used = 0;
+			}
+			if (shieldUse == 1){
+				atlanta.shieldGain -= atlanta.maxShield/2;
+				shieldUse = 0;
 			}
 			while (tour == 1){
 				switch (choix){
@@ -1026,16 +1197,18 @@
 						displayEnnemy(&ennemis[ennemyId]);
 						display(5,etape);
 						printf("├───────────────────────────────────────────────────────────────┤\n"
-			   			       "│                                                               │\n"
-			   			       "│  \e[0;92m* Le Bouclier se régénèrera davantage ce tour-ci !\e[0m           │\n"
-			   			       "│                                                               │\n"
-			   			       "│                                                               │\n"
-			   			       "│                                                               │\n"
-			   			       "├───────────────────────────────────────────────────────────────┤\n"
-			   			       "│ [0] Retour                                                    │\n"
-			   			       "└───────────────────────────────────────────────────────────────┘\n");
-						atlanta.shieldGain += atlanta.shield/2;
+						       "│                                                               │\n"
+						       "│  \e[0;92m* Le Bouclier se régénèrera davantage ce tour-ci !\e[0m           │\n"
+						       "│                                                               │\n"
+						       "│                                                               │\n"
+						       "│                                                               │\n"
+						       "├───────────────────────────────────────────────────────────────┤\n"
+						       "│ [0] Retour                                                    │\n"
+						       "└───────────────────────────────────────────────────────────────┘\n");
+						atlanta.shieldGain += atlanta.maxShield/2;
 						atlanta.energy -= 5;
+						shieldUse = 1;
+						choix = 0;
 						break;
 					case 4:
 						//Fin de tour
@@ -1083,14 +1256,14 @@
 				displayEnnemy(&ennemis[ennemyId]);
 				display(5,etape);
 				printf("├───────────────────────────────────────────────────────────────┤\n"
-			   		   "│                                                               │\n"
-			   		   "│  \e[0;92mL'ennemis n'a pas pu attaquer ce tour !\e[0m                      │\n"
-			   		   "│                                                               │\n"
-			   		   "│                                                               │\n"
-			   		   "│                                                               │\n"
-			   		   "├───────────────────────────────────────────────────────────────┤\n"
-			   		   "│ [0] Suite                                                     │\n"
-			   		   "└───────────────────────────────────────────────────────────────┘\n");
+					   "│                                                               │\n"
+					   "│  \e[0;92mL'ennemis n'a pas pu attaquer ce tour !\e[0m                      │\n"
+					   "│                                                               │\n"
+					   "│                                                               │\n"
+					   "│                                                               │\n"
+					   "├───────────────────────────────────────────────────────────────┤\n"
+					   "│ [0] Suite                                                     │\n"
+					   "└───────────────────────────────────────────────────────────────┘\n");
 				choix1 = 1;
 				while (choix1 != 0){
 					scanf("%d",&choix1);
@@ -1113,35 +1286,35 @@
 					displayEnnemy(&ennemis[ennemyId]);
 					display(5,etape);
 					printf("├───────────────────────────────────────────────────────────────┤\n"
-			   			   "│                                                               │\n"
-			   			   "│ \e[0;91m* Les rayons solaire font perdre 5 points à l'Atlanta\e[0m         │\n"
-			   			   "│                                                               │\n"
-			   			   "│ \e[0;92m* Les rayons solaire font perdre 5 points à l'ennemis\e[0m         │\n"
-			   			   "│                                                               │\n"
-			   			   "├───────────────────────────────────────────────────────────────┤\n"
-			   			   "│ [0] Suite                                                     │\n"
-			   			   "└───────────────────────────────────────────────────────────────┘\n");
+						   "│                                                               │\n"
+						   "│ \e[0;91m* Les rayons solaire font perdre 5 points à l'Atlanta\e[0m         │\n"
+						   "│                                                               │\n"
+						   "│ \e[0;92m* Les rayons solaire font perdre 5 points à l'ennemis\e[0m         │\n"
+						   "│                                                               │\n"
+						   "├───────────────────────────────────────────────────────────────┤\n"
+						   "│ [0] Suite                                                     │\n"
+						   "└───────────────────────────────────────────────────────────────┘\n");
 					break;
 				case 2://planete
 					displayAtlanta();
 					displayEnnemy(&ennemis[ennemyId]);
 					display(5,etape);
 					printf("├───────────────────────────────────────────────────────────────┤\n"
-			   			   "│                                                               │\n"
-			   			   "│                                                               │\n"
-			   			   "│                                                               │\n"
-			   			   "│                                                               │\n"
-			   			   "│                                                               │\n"
-			   			   "├───────────────────────────────────────────────────────────────┤\n"
-			   			   "│ [0] Suite                                                     │\n"
-			   			   "└───────────────────────────────────────────────────────────────┘\n");
+						   "│                                                               │\n"
+						   "│                                                               │\n"
+						   "│                                                               │\n"
+						   "│                                                               │\n"
+						   "│                                                               │\n"
+						   "├───────────────────────────────────────────────────────────────┤\n"
+						   "│ [0] Suite                                                     │\n"
+						   "└───────────────────────────────────────────────────────────────┘\n");
 					break;
 				case 3://asteroid
 					displayAtlanta();
 					displayEnnemy(&ennemis[ennemyId]);
 					display(5,etape);
 					printf("├───────────────────────────────────────────────────────────────┤\n"
-			   			   "│                                                               │\n");
+						   "│                                                               │\n");
 					int r1 = random_nbr(1,2);
 					if (r1 == 1) {
 						atlanta.shield -= 20;
@@ -1166,6 +1339,8 @@
 						}
 						if (ennemis[ennemyId].hull < 0){
 							ennemis[ennemyId].hull = 0;
+							drops(ennemyId, etape);
+							return;
 						}
 						printf("│ \e[0;92m* L'ennemis percute un astéroïde, 20 points de dégats !\e[0m       │\n");
 					}else{
@@ -1173,8 +1348,8 @@
 					}
 					printf("│                                                               │\n"
 						   "├───────────────────────────────────────────────────────────────┤\n"
-			   			   "│ [0] Suite                                                     │\n"
-			   			   "└───────────────────────────────────────────────────────────────┘\n");
+						   "│ [0] Suite                                                     │\n"
+						   "└───────────────────────────────────────────────────────────────┘\n");
 					break;
 				case 4://vide
 					displayAtlanta();
@@ -1182,14 +1357,14 @@
 					display(5,etape);
 					atlanta.energyGain = peter.value/2;
 					printf("├───────────────────────────────────────────────────────────────┤\n"
-			   			   "│                                                               │\n"
-			   			   "│  \e[0;94mLe Manque de lumière environnante ralentit la récupération\e[0m   │\n"
-			   			   "│                                                               │\n"
-			   			   "│  \e[0;94md'énergie !\e[0m                                                  │\n"
-			   			   "│                                                               │\n"
-			   			   "├───────────────────────────────────────────────────────────────┤\n"
-			   			   "│ [0] Suite                                                     │\n"
-			   			   "└───────────────────────────────────────────────────────────────┘\n");
+						   "│                                                               │\n"
+						   "│  \e[0;94mLe Manque de lumière environnante ralentit la récupération\e[0m   │\n"
+						   "│                                                               │\n"
+						   "│  \e[0;94md'énergie !\e[0m                                                  │\n"
+						   "│                                                               │\n"
+						   "├───────────────────────────────────────────────────────────────┤\n"
+						   "│ [0] Suite                                                     │\n"
+						   "└───────────────────────────────────────────────────────────────┘\n");
 					break;
 			}
 			atlanta.energy += (atlanta.energyGain + peter.value);
@@ -1229,6 +1404,7 @@
 	}
 
 	void menuVaisseau() {
+		system("clear");
 		int testMenu = 0;
 		int choix = 0;
 		//system("clear");
@@ -1269,7 +1445,7 @@
 					system("clear");
 					displayAtlanta();
 					display(3,3);
-					for (int i; i<99; i++){
+					for (int i = 0; i<99; i++){
 						if (atlanta.sys[i] == 1){
 							printMenu(31 + i, "   ");
 							display(3,4);
@@ -1279,6 +1455,8 @@
 					scanf("%d",&choix);
 					system("clear");
 					menuVaisseau();
+					testMenu = 1;
+					return;
 					break;
 				case 3:
 					system("clear");
@@ -1287,10 +1465,12 @@
 					scanf("%d",&choix);
 					system("clear");
 					menuVaisseau();
+					testMenu = 1;
+					return;
 					break;
 				case 4:
 					testMenu = 1;
-					system("clear");
+					return;
 					break;
 				default:
 					printf("Choix Invalide\n");
@@ -1300,11 +1480,14 @@
 		}
 	}
 
-	void changeWeapon(int id, int price){
+	void changeWeapon(int id, int price) {
 		system("clear");
 		int choix = 0;
 		int test = 0;
 		int test1 = 0;
+		displayAtlanta();
+		printf("├───────────────────────────────────────────────────────────────┤\n"
+			   "│ Selectionnez l'arme à remplacer :                             │\n");
 		display(3,2);
 		while (test == 0){
 			scanf("%d",&choix);
@@ -1323,6 +1506,9 @@
 					if (atlanta.weapon1 != 0){
 						system("clear");
 						atlanta.weapon1 = id;
+						displayAtlanta();
+						printf("├───────────────────────────────────────────────────────────────┤\n"
+							   "│ Choix validé !                                                │\n");
 						display(3,2);
 						test1 = 1;
 					}else{
@@ -1333,6 +1519,9 @@
 					if (atlanta.weapon2 != 0){
 						system("clear");
 						atlanta.weapon2 = id;
+						displayAtlanta();
+						printf("├───────────────────────────────────────────────────────────────┤\n"
+							   "│ Choix validé !                                                │\n");
 						display(3,2);
 						test1 = 1;
 					}else{
@@ -1343,6 +1532,9 @@
 					if (atlanta.weapon3 != 0){
 						system("clear");
 						atlanta.weapon3 = id;
+						displayAtlanta();
+						printf("├───────────────────────────────────────────────────────────────┤\n"
+							   "│ Choix validé !                                                │\n");
 						display(3,2);
 						test1 = 1;
 					}else{
@@ -1356,8 +1548,10 @@
 		}
 	}
 
-	void menuShop(int pool){
+	void menuShop(int pool, int etape) {//pool = niveau du monde - 1
 		//autant de variables pour les arborescences parceque si l'on quitte la fonction, de nouveaux items seront générés
+		system("clear");
+		strcpy(sclr,"1;92");
 		int choix = 0;
 		int choix1 = 0;
 		int test = 0;
@@ -1397,6 +1591,7 @@
 		while (test == 0){
 			test1 = 0;
 			displayAtlanta();
+			display(5,etape);
 			display(4,1);
 			scanf("%d",&choix);
 			system("clear");
@@ -1559,6 +1754,19 @@
 						test1 = 1;
 						break;
 					case 4:
+						if (atlanta.flouze >= 50){
+							atlanta.flouze -= 50;
+							atlanta.hull += 20;
+							if (atlanta.hull > atlanta.maxHull){
+								atlanta.hull = atlanta.maxHull;
+							}
+						}else{
+							printf("Pas assez de Crédits !\n");
+						}
+						choix = 0;
+						test1 = 1;
+						break;
+					case 5:
 						test = 1;
 						test1 = 1;
 						break;
@@ -1569,43 +1777,227 @@
 				}
 			}
 		}
-		//voir items en vente ( choisis aléatoirement en fonction d'un pool propre à l'avancée et au lieu)
-		//voir caractéristiques des armes et objets
-		printf("quitté");
 	}
-	//Menu scenario
-	void scenario(int niveau, int milieu, int index){
+//scenarios
+	void controlePyrien(int niveau, int milieu) {
+		system("clear");
+		int choix = 1;
+		int test = 0;
+		int r = 0;
+		displayAtlanta();
+		display(5,milieu);
+		printf("├───────────────────────────────────────────────────────────────┤\n"
+			   "│ A peine sortis de l'hyper saut, un éclaireur Pyrien vous      │\n"
+			   "│ interpèle par message radio :                                 │\n"
+			   "│ - Nous allons aborder ce vaisseau pour un contrôle, merci de  │\n"
+			   "│ coopérer. Terminé.                                            │\n"
+			   "│ [1] Coopérer                                                  │\n"
+			   "│ [2] Attaquer                                                  │\n"
+			   "└───────────────────────────────────────────────────────────────┘\n");
+		while (test == 0){
+			scanf("%d",&choix);
+			system("clear");
+			if (choix == 1){
+				displayAtlanta();
+				display(5,milieu);
+				printf("├───────────────────────────────────────────────────────────────┤\n"
+					   "│ Vous annocez aux Pyriens que vous comptez coopérer, et vous   │\n"
+					   "│ les laissez s'approcher de votre vaisseau mais au lieu de     │\n"
+					   "│ vous abordez, ils vous tirent dessus !                        │\n"
+					   "│ Vous êtes chassé partout dans tout l'univers !                │\n"
+					   "├───────────────────────────────────────────────────────────────┤\n"
+					   "│ [0] Suite                                                     │\n"
+					   "└───────────────────────────────────────────────────────────────┘\n");
+				atlanta.hull -= 10;
+				test = 1;
+			}else if (choix == 2){
+				displayAtlanta();
+				display(5,milieu);
+				printf("├───────────────────────────────────────────────────────────────┤\n"
+					   "│ Vous annocez aux Pyriens que vous comptez coopérer, mais vous │\n"
+					   "│ engagez le combat dès qu'ils sont à portée de tirs !          │\n"
+					   "├───────────────────────────────────────────────────────────────┤\n"
+					   "│ [0] Suite                                                     │\n"
+					   "└───────────────────────────────────────────────────────────────┘\n");
+				test = 1;
+			}else{
+				printf("Choix Invalide");
+			}
+		}
+		while (choix != 0){
+			scanf("%d",&choix);
+			system("clear");
+		}
+		choix = 1;
+		r = random_nbr(1,4);
+		switch(r){
+			case 1:
+				combat(0,milieu);
+				break;
+			case 2:
+				combat(2,milieu);
+				break;
+			case 3:
+				combat(5,milieu);
+				break;
+			case 4:
+				combat(7,milieu);
+				break;
+		}
+		menuVaisseau();
+	}
+	void droneAsteroid(int niveau, int milieu) {
+		system("clear");
+		int choix = 1;
+		int choix2 = 0;
+		int test = 0;
+		int r = 0;
+		displayAtlanta();
+		display(5,milieu);
+		printf("├───────────────────────────────────────────────────────────────┤\n"
+			   "│ Vous entrez dans une ceinture d'astéroïdes et remarquez sur   │\n"
+			   "│ votre radar l'émission d'un signal de détresse                │\n"
+			   "│ [1] Aller voir                                                │\n"
+			   "│ [2] Attendre le rechargement et partir                        │\n"
+			   "└───────────────────────────────────────────────────────────────┘\n");
+		while (test == 0){
+			scanf("%d",&choix);
+			system("clear");
+			displayAtlanta();
+			display(5,milieu);
+			if (choix == 1){
+				printf("├───────────────────────────────────────────────────────────────┤\n"
+					   "│ Vous vous rapprochez alors du signal et remarquer un drone    │\n"
+					   "│ sur un astéroïde, il a l'air endomagé                         │\n"
+					   "│ [1] Le réparer (5£)                                           │\n"
+					   "│ [2] Attendre le rechargement et partir                        │\n"
+					   "│ [3] Dépouiller le drone                                       │\n"
+					   "└───────────────────────────────────────────────────────────────┘\n");
+				while (test == 0){
+					scanf("%d",&choix2);
+					system("clear");
+					if (choix2 == 1){
+						displayAtlanta();
+						display(5,milieu);
+						printf("├───────────────────────────────────────────────────────────────┤\n"
+							   "│ Vous avez réparé le drone, pour vous remercier, il propose de │\n"
+							   "│ vous vendre certaines de ses trouvailles                      │\n"
+							   "│ [1] Voir Magasin                                              │\n"
+							   "│ [2] Partir                                                    │\n"
+							   "└───────────────────────────────────────────────────────────────┘\n");
+						atlanta.flouze -= 5;
+						while (test == 0){
+							scanf("%d",&choix);
+							if (choix == 1){
+								test = 1;
+								system("clear");
+								menuShop(0,milieu);
+								menuVaisseau();
+								return;
+							}else if (choix == 2){
+								test = 1;
+								system("clear");
+								menuVaisseau();
+								return;
+							}
+						}
+					}else if (choix2 == 2){
+						test = 1;
+						menuVaisseau();
+						return;
+					}else if (choix2 == 3){
+						test = 1;
+						displayAtlanta();
+						display(5,milieu);
+						printf("├───────────────────────────────────────────────────────────────┤\n"
+							   "│ Vous vous approchez du drone pour le dépouiller mais au       │\n"
+							   "│ moment de l'aborder, un mécanisme d'auto défense s'active et  │\n"
+							   "│ engage le combat !                                            │\n"
+							   "├───────────────────────────────────────────────────────────────┤\n"
+							   "│ [0] Suite                                                     │\n"
+							   "└───────────────────────────────────────────────────────────────┘\n");
+						while (choix2 != 0){	
+							scanf("%d",&choix2);	
+						}
+						system("clear");
+						combat(4,milieu);
+						menuVaisseau();
+						return;
+					}else{
+						printf("Choix Invalide");
+					}
+				}
+			}else if (choix == 2){
+				test = 1;
+				menuVaisseau();
+				return;
+			}
+		}
+		menuVaisseau();	
+	}
+//Menu scenario
+	void scenario(int niveau, int milieu, int index) {
+		/*menuShop(niveau-1,milieu);
+		r = random_nbr(0,7);
+		combat(r,milieu);*/
+		//choix ou arboressence de choix
+			//output -> combat, shop, récolte ou perte
+		//menu vaisseau
+		//Id du milieu : World.type[milieu]
 		int choix = 0;
+		int test = 1;
+		int r = 0;
 		switch (niveau){
 			case 1 :
 				switch (milieu){
 					case 1 :
-						switch (index){
-							case 1:
-								combat(0,milieu);
-								printf("Vous avez gagné !\n");
-								//scanf("%d",&choix);
-								//print
-								//choix ou arboressence de choix
-									//output -> combat, shop, récolte ou perte
-								//menu vaisseau
-								//Id du milieu : World.type[milieu]
-								break;
-						}
+						controlePyrien(niveau, milieu);
 						break;
 					case 2:
-						strcpy(&clr[0], "1;92");
+						//couleur de la planète
+						r = random_nbr(1,6);
+						switch (r){
+							case 1:
+								strcpy(&clr[0], "1;91");
+								break;
+							case 2:
+								strcpy(&clr[0], "0;31");
+								break;
+							case 3:
+								strcpy(&clr[0], "1;92");
+								break;
+							case 4:
+								strcpy(&clr[0], "0;36");
+								break;
+							case 5:
+								strcpy(&clr[0], "0;96");
+								break;
+							case 6:
+								strcpy(&clr[0], "1;97");
+								break;
+						}
 						switch (index){
 							case 1:
-								combat(0,milieu);
+								controlePyrien(niveau, milieu);
 								break;
 						}
 						break;
 					case 3:
-						combat(0,milieu);
+						switch (index){
+							case 1:
+								droneAsteroid(niveau, milieu);
+								break;
+							case 2:
+								droneAsteroid(niveau, milieu);
+								break;
+						}
 						break;
 					case 4:
-						combat(0,milieu);
+						switch (index){
+							case 1:
+								controlePyrien(niveau, milieu);
+								break;
+						}
 						break;
 				}
 				break;
@@ -1647,11 +2039,9 @@
 
 	void niveau(Route * route, int monde){
 		int currentEtape = 0;
-
 		//attribution des valeurs générées dans Etape
 		Etape etape[99];
 		World world;
-
 		world.route = route->id;
 		for (int i = 0; i < route->nbr; i++){
 			etape[i/2].next[0] = route->road[i-1];
@@ -1666,9 +2056,10 @@
 		world.nbrEtape = route->nbr;
 		for (int i = 1; i < 9; i++){
 			currentEtape = navigation(&world,&etape[currentEtape],currentEtape,monde);
+			system("clear");
 			//navigation
 			int alea = random_nbr(1,1);
-			scenario(1,world.type[currentEtape],alea);
+			scenario(monde,world.type[currentEtape],alea);
 			//check end
 		}
 	}
@@ -1685,17 +2076,84 @@
 		//Niveau --> Debut d'un cycle
 	}
 
-
 	int main(){
 		srand(time(NULL));
-		int end = 0;
+		int test = 1;
+		int test1 = 1;
+		int test2 = 1;
+		//Intro
+		display(1,1);
+		while (test != 0){
+			scanf("%d",&test);
+			system("clear");
+		}
+		while (test2 != 0){
+			display(2,1);
+			scanf("%d",&test);
+			system("clear");
+			switch (test){
+				case 1:
+					test1 = 1;
+					display(2,2);
+					while (test1 != 0){
+						scanf("%d",&test1);
+						system("clear");
+					}
+					break;
+				case 2:
+					test1 = 1;
+					display(2,3);
+					while (test1 != 0){
+						scanf("%d",&test1);
+						system("clear");
+					}
+					break;
+				case 3:
+					test1 = 1;
+					display(2,4);
+					while (test1 != 0){
+						scanf("%d",&test1);
+						system("clear");
+					}
+					break;
+				case 4:
+					test2 = 0;
+					break;
+			}
+		}
+		system("clear");
+		printf("Voulez-vous choisir la couleur de votre vaisseau ?\n[1] Oui\n[2] Non");
+		scanf("%d",&test);
+		system("clear");
+		if (test == 1){
+			printf("Choisissez parmis les suivantes : [1] \e[0;44m \e[0m [2] \e[0;102m \e[0m [3] \e[0;103m \e[0m [4] \e[41m \e[0m [5] \e[0;106m \e[0m\n");
+			scanf("%d",&test);
+			system("clear");
+			switch (test){
+				case 1:
+					strcpy(atlanta.color,"0;44");
+					break;
+				case 2:
+					strcpy(atlanta.color,"0;102");
+					break;
+				case 3:
+					strcpy(atlanta.color,"0;103");
+					break;
+				case 4:
+					strcpy(atlanta.color,"41");
+					break;
+				case 5:
+					strcpy(atlanta.color,"0;106");
+					break;
+			}
+		}
 		//menuVaisseau();
-		menuShop(0);
+		//menuShop(0);
 		//displayAtlanta();
 		//generateMap(1);
 		//cycle
-		/*while (end == 0){
-			//generate map
-		}*/
+		for (int i = 1; i<=8; i++){
+			generateMap(i);
+		}
 	return 0;
 	}
