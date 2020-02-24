@@ -90,7 +90,7 @@
 	Crew victor = {0, 1, 5};
 	Crew qtal = {0, 1, 5};
 
-	Weapon armes[99] = {{0, "", 0, 0, 0, 0, "", -1, 0},{1, "Cannon à Ions  ", 10 /*2 digits*/, 2, 80, 150, "150", 0, 3},{2, "Vieux Cannon", 20 , 1, 60, 100, "100", 0, 3},{3, "Gatling", 10 , 5, 40, 160, "160", 0, 3},{4, "Vieux Missile", 15 , 1, 100, 150, "150", 0, 3},//tier D
+	Weapon armes[99] = {{0, "", 0, 0, 0, 0, "", -1, 0},{1, "Cannon à Ions  ", 10 /*2 digits*/, 2, 80, 150, "150", 0, 3},{2, "Vieux Cannon", 20 , 1, 60, 100, "100", 0, 3},{3, "Gatling", 10 , 5, 30, 160, "160", 0, 3},{4, "Vieux Missile", 15 , 1, 100, 150, "150", 0, 3},//tier D
 													   {5, "Cannon à Pulsion", 20, 3, 50, 200, "220", 0, 4},{6, "Gatling à Proton", 20, 5, 40, 200, "200", 0, 4},{7, "Laser ", 40, 1, 60, 200, "200", 0, 4},{8, "Cannon XM1", 15, 2, 80, 190, "190", 0, 4},//tier C
 													   //{5, "Cannon à impulsion", 20, 3, 50, 200, "220", 0, 4},{6, "Gatling à Proton", 20, 5, 40, 200, "200", 0, 4},{7, "Laser ", 40, 1, 60, 200, "200", 0, 4},{8, "Cannon XM1", 15, 2, 80, 190, "190", 0, 4},
 													};
@@ -1073,6 +1073,7 @@
 		int choix1 = 0;
 		int test = 0;
 		int dodge = 0;
+		int shieldUse = 0;
 		ennemis[ennemyId].hull = ennemis[ennemyId].maxHull;
 		ennemis[ennemyId].shield = ennemis[ennemyId].maxShield;
 		ennemis[ennemyId].energy = ennemis[ennemyId].maxEnergy/2;
@@ -1088,6 +1089,10 @@
 			}
 			if (armes[atlanta.weapon3].used == 1){
 				armes[atlanta.weapon3].used = 0;
+			}
+			if (shieldUse == 1){
+				atlanta.shieldGain -= atlanta.maxShield/2;
+				shieldUse = 0;
 			}
 			while (tour == 1){
 				switch (choix){
@@ -1200,8 +1205,10 @@
 						       "├───────────────────────────────────────────────────────────────┤\n"
 						       "│ [0] Retour                                                    │\n"
 						       "└───────────────────────────────────────────────────────────────┘\n");
-						atlanta.shieldGain += atlanta.shield/2;
+						atlanta.shieldGain += atlanta.maxShield/2;
 						atlanta.energy -= 5;
+						shieldUse = 1;
+						choix = 0;
 						break;
 					case 4:
 						//Fin de tour
@@ -1332,6 +1339,8 @@
 						}
 						if (ennemis[ennemyId].hull < 0){
 							ennemis[ennemyId].hull = 0;
+							drops(ennemyId, etape);
+							return;
 						}
 						printf("│ \e[0;92m* L'ennemis percute un astéroïde, 20 points de dégats !\e[0m       │\n");
 					}else{
@@ -1395,6 +1404,7 @@
 	}
 
 	void menuVaisseau() {
+		system("clear");
 		int testMenu = 0;
 		int choix = 0;
 		//system("clear");
@@ -1435,7 +1445,7 @@
 					system("clear");
 					displayAtlanta();
 					display(3,3);
-					for (int i; i<99; i++){
+					for (int i = 0; i<99; i++){
 						if (atlanta.sys[i] == 1){
 							printMenu(31 + i, "   ");
 							display(3,4);
@@ -1445,6 +1455,8 @@
 					scanf("%d",&choix);
 					system("clear");
 					menuVaisseau();
+					testMenu = 1;
+					return;
 					break;
 				case 3:
 					system("clear");
@@ -1453,10 +1465,12 @@
 					scanf("%d",&choix);
 					system("clear");
 					menuVaisseau();
+					testMenu = 1;
+					return;
 					break;
 				case 4:
 					testMenu = 1;
-					system("clear");
+					return;
 					break;
 				default:
 					printf("Choix Invalide\n");
@@ -1466,7 +1480,7 @@
 		}
 	}
 
-	void changeWeapon(int id, int price){
+	void changeWeapon(int id, int price) {
 		system("clear");
 		int choix = 0;
 		int test = 0;
@@ -1534,7 +1548,7 @@
 		}
 	}
 
-	void menuShop(int pool, int etape){//pool = niveau du monde - 1
+	void menuShop(int pool, int etape) {//pool = niveau du monde - 1
 		//autant de variables pour les arborescences parceque si l'on quitte la fonction, de nouveaux items seront générés
 		system("clear");
 		strcpy(sclr,"1;92");
@@ -1764,28 +1778,180 @@
 			}
 		}
 	}
-	//Menu scenario
-	void scenario(int niveau, int milieu, int index){
+//scenarios
+	void controlePyrien(int niveau, int milieu) {
+		system("clear");
+		int choix = 1;
+		int test = 0;
+		int r = 0;
+		displayAtlanta();
+		display(5,milieu);
+		printf("├───────────────────────────────────────────────────────────────┤\n"
+			   "│ A peine sortis de l'hyper saut, un éclaireur Pyrien vous      │\n"
+			   "│ interpèle par message radio :                                 │\n"
+			   "│ - Nous allons aborder ce vaisseau pour un contrôle, merci de  │\n"
+			   "│ coopérer. Terminé.                                            │\n"
+			   "│ [1] Coopérer                                                  │\n"
+			   "│ [2] Attaquer                                                  │\n"
+			   "└───────────────────────────────────────────────────────────────┘\n");
+		while (test == 0){
+			scanf("%d",&choix);
+			system("clear");
+			if (choix == 1){
+				displayAtlanta();
+				display(5,milieu);
+				printf("├───────────────────────────────────────────────────────────────┤\n"
+					   "│ Vous annocez aux Pyriens que vous comptez coopérer, et vous   │\n"
+					   "│ les laissez s'approcher de votre vaisseau mais au lieu de     │\n"
+					   "│ vous abordez, ils vous tirent dessus !                        │\n"
+					   "│ Vous êtes chassé partout dans tout l'univers !                │\n"
+					   "├───────────────────────────────────────────────────────────────┤\n"
+					   "│ [0] Suite                                                     │\n"
+					   "└───────────────────────────────────────────────────────────────┘\n");
+				atlanta.hull -= 10;
+				test = 1;
+			}else if (choix == 2){
+				displayAtlanta();
+				display(5,milieu);
+				printf("├───────────────────────────────────────────────────────────────┤\n"
+					   "│ Vous annocez aux Pyriens que vous comptez coopérer, mais vous │\n"
+					   "│ engagez le combat dès qu'ils sont à portée de tirs !          │\n"
+					   "├───────────────────────────────────────────────────────────────┤\n"
+					   "│ [0] Suite                                                     │\n"
+					   "└───────────────────────────────────────────────────────────────┘\n");
+				test = 1;
+			}else{
+				printf("Choix Invalide");
+			}
+		}
+		while (choix != 0){
+			scanf("%d",&choix);
+			system("clear");
+		}
+		choix = 1;
+		r = random_nbr(1,4);
+		switch(r){
+			case 1:
+				combat(0,milieu);
+				break;
+			case 2:
+				combat(2,milieu);
+				break;
+			case 3:
+				combat(5,milieu);
+				break;
+			case 4:
+				combat(7,milieu);
+				break;
+		}
+		menuVaisseau();
+	}
+	void droneAsteroid(int niveau, int milieu) {
+		system("clear");
+		int choix = 1;
+		int choix2 = 0;
+		int test = 0;
+		int r = 0;
+		displayAtlanta();
+		display(5,milieu);
+		printf("├───────────────────────────────────────────────────────────────┤\n"
+			   "│ Vous entrez dans une ceinture d'astéroïdes et remarquez sur   │\n"
+			   "│ votre radar l'émission d'un signal de détresse                │\n"
+			   "│ [1] Aller voir                                                │\n"
+			   "│ [2] Attendre le rechargement et partir                        │\n"
+			   "└───────────────────────────────────────────────────────────────┘\n");
+		while (test == 0){
+			scanf("%d",&choix);
+			system("clear");
+			displayAtlanta();
+			display(5,milieu);
+			if (choix == 1){
+				printf("├───────────────────────────────────────────────────────────────┤\n"
+					   "│ Vous vous rapprochez alors du signal et remarquer un drone    │\n"
+					   "│ sur un astéroïde, il a l'air endomagé                         │\n"
+					   "│ [1] Le réparer (5£)                                           │\n"
+					   "│ [2] Attendre le rechargement et partir                        │\n"
+					   "│ [3] Dépouiller le drone                                       │\n"
+					   "└───────────────────────────────────────────────────────────────┘\n");
+				while (test == 0){
+					scanf("%d",&choix2);
+					system("clear");
+					if (choix2 == 1){
+						displayAtlanta();
+						display(5,milieu);
+						printf("├───────────────────────────────────────────────────────────────┤\n"
+							   "│ Vous avez réparé le drone, pour vous remercier, il propose de │\n"
+							   "│ vous vendre certaines de ses trouvailles                      │\n"
+							   "│ [1] Voir Magasin                                              │\n"
+							   "│ [2] Partir                                                    │\n"
+							   "└───────────────────────────────────────────────────────────────┘\n");
+						atlanta.flouze -= 5;
+						while (test == 0){
+							scanf("%d",&choix);
+							if (choix == 1){
+								test = 1;
+								system("clear");
+								menuShop(0,milieu);
+								menuVaisseau();
+								return;
+							}else if (choix == 2){
+								test = 1;
+								system("clear");
+								menuVaisseau();
+								return;
+							}
+						}
+					}else if (choix2 == 2){
+						test = 1;
+						menuVaisseau();
+						return;
+					}else if (choix2 == 3){
+						test = 1;
+						displayAtlanta();
+						display(5,milieu);
+						printf("├───────────────────────────────────────────────────────────────┤\n"
+							   "│ Vous vous approchez du drone pour le dépouiller mais au       │\n"
+							   "│ moment de l'aborder, un mécanisme d'auto défense s'active et  │\n"
+							   "│ engage le combat !                                            │\n"
+							   "├───────────────────────────────────────────────────────────────┤\n"
+							   "│ [0] Suite                                                     │\n"
+							   "└───────────────────────────────────────────────────────────────┘\n");
+						while (choix2 != 0){	
+							scanf("%d",&choix2);	
+						}
+						system("clear");
+						combat(4,milieu);
+						menuVaisseau();
+						return;
+					}else{
+						printf("Choix Invalide");
+					}
+				}
+			}else if (choix == 2){
+				test = 1;
+				menuVaisseau();
+				return;
+			}
+		}
+		menuVaisseau();	
+	}
+//Menu scenario
+	void scenario(int niveau, int milieu, int index) {
+		/*menuShop(niveau-1,milieu);
+		r = random_nbr(0,7);
+		combat(r,milieu);*/
+		//choix ou arboressence de choix
+			//output -> combat, shop, récolte ou perte
+		//menu vaisseau
+		//Id du milieu : World.type[milieu]
 		int choix = 0;
+		int test = 1;
 		int r = 0;
 		switch (niveau){
 			case 1 :
 				switch (milieu){
 					case 1 :
-						switch (index){
-							case 1:
-								menuShop(niveau-1,milieu);
-								r = random_nbr(0,7);
-								combat(r,milieu);
-								printf("Vous avez gagné !\n");
-								//scanf("%d",&choix);
-								//print
-								//choix ou arboressence de choix
-									//output -> combat, shop, récolte ou perte
-								//menu vaisseau
-								//Id du milieu : World.type[milieu]
-								break;
-						}
+						controlePyrien(niveau, milieu);
 						break;
 					case 2:
 						//couleur de la planète
@@ -1810,18 +1976,28 @@
 								strcpy(&clr[0], "1;97");
 								break;
 						}
-						
 						switch (index){
 							case 1:
-								combat(0,milieu);
+								controlePyrien(niveau, milieu);
 								break;
 						}
 						break;
 					case 3:
-						combat(0,milieu);
+						switch (index){
+							case 1:
+								droneAsteroid(niveau, milieu);
+								break;
+							case 2:
+								droneAsteroid(niveau, milieu);
+								break;
+						}
 						break;
 					case 4:
-						combat(0,milieu);
+						switch (index){
+							case 1:
+								controlePyrien(niveau, milieu);
+								break;
+						}
 						break;
 				}
 				break;
@@ -1880,6 +2056,7 @@
 		world.nbrEtape = route->nbr;
 		for (int i = 1; i < 9; i++){
 			currentEtape = navigation(&world,&etape[currentEtape],currentEtape,monde);
+			system("clear");
 			//navigation
 			int alea = random_nbr(1,1);
 			scenario(monde,world.type[currentEtape],alea);
